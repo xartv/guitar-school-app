@@ -125,7 +125,7 @@ Add relation to Program.
 
 ------------------------------------------------------------------------
 
-## Task 9
+## Task 9 ✅
 
 Run Prisma migration for Level.
 
