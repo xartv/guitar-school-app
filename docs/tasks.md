@@ -97,7 +97,7 @@ Do not add relations yet.
 
 ------------------------------------------------------------------------
 
-## Task 7
+## Task 7 ✅
 
 Run Prisma migration for the Program model.
 
