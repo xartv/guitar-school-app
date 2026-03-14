@@ -284,7 +284,7 @@ Return all levels for a program ordered by "order".
 
 ------------------------------------------------------------------------
 
-## Task 23
+## Task 23 ✅
 
 Add "Add Level" button to the main page.
 
