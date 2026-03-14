@@ -21,4 +21,15 @@ model Level {
   programId String
   createdAt DateTime @default(now())
   program   Program  @relation(fields: [programId], references: [id])
+  skills    Skill[]
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  title     String
+  notes     String?
+  completed Boolean  @default(false)
+  levelId   String
+  createdAt DateTime @default(now())
+  level     Level    @relation(fields: [levelId], references: [id])
 }

@@ -133,7 +133,7 @@ Verify database structure.
 
 ------------------------------------------------------------------------
 
-## Task 10
+## Task 10 ✅
 
 Add the Skill model.
 
