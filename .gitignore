@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# database
+*.db
+*.db-journal
+
+# prisma
+prisma/migrations/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# tools
+.claude/
+.playwright-mcp/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
