@@ -83,7 +83,7 @@ Export a single PrismaClient instance.
 
 # Phase 2 --- Database Schema
 
-## Task 6
+## Task 6 ✅
 
 Add the Program model to schema.prisma.
 

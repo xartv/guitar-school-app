@@ -6,3 +6,9 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+model Program {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+}
