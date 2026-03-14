@@ -25,11 +25,20 @@ model Level {
 }
 
 model Skill {
-  id        String   @id @default(cuid())
+  id        String       @id @default(cuid())
   title     String
   notes     String?
-  completed Boolean  @default(false)
+  completed Boolean      @default(false)
   levelId   String
-  createdAt DateTime @default(now())
-  level     Level    @relation(fields: [levelId], references: [id])
+  createdAt DateTime     @default(now())
+  level     Level        @relation(fields: [levelId], references: [id])
+  stages    SkillStage[]
+}
+
+model SkillStage {
+  id        String  @id @default(cuid())
+  stage     Int
+  completed Boolean @default(false)
+  skillId   String
+  skill     Skill   @relation(fields: [skillId], references: [id])
 }

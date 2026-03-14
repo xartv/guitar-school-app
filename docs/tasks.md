@@ -150,13 +150,13 @@ Add relation to Level.
 
 ------------------------------------------------------------------------
 
-## Task 11
+## Task 11 ✅
 
 Run Prisma migration for Skill.
 
 ------------------------------------------------------------------------
 
-## Task 12
+## Task 12 ✅
 
 Add the SkillStage model.
 
@@ -171,7 +171,7 @@ Add relation to Skill.
 
 ------------------------------------------------------------------------
 
-## Task 13
+## Task 13 ✅
 
 Run Prisma migration for SkillStage.
 
