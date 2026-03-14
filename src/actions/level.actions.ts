@@ -2,6 +2,15 @@
 
 import { prisma } from "@/lib/prisma"
 
+export async function getLevels(programId: string) {
+  const levels = await prisma.level.findMany({
+    where: { programId },
+    orderBy: { order: "asc" },
+  })
+
+  return levels
+}
+
 export async function createLevel(programId: string) {
   const count = await prisma.level.count({ where: { programId } })
   const order = count + 1
