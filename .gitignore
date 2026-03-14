@@ -12,9 +12,6 @@ build/
 *.db
 *.db-journal
 
-# prisma
-prisma/migrations/
-
 # env
 .env
 .env.local
@@ -34,3 +31,6 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+*.png
