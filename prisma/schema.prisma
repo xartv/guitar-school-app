@@ -11,4 +11,14 @@ model Program {
   id        String   @id @default(cuid())
   title     String
   createdAt DateTime @default(now())
+  levels    Level[]
+}
+
+model Level {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int
+  programId String
+  createdAt DateTime @default(now())
+  program   Program  @relation(fields: [programId], references: [id])
 }

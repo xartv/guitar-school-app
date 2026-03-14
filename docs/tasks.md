@@ -109,7 +109,7 @@ Verify the table is created.
 
 ------------------------------------------------------------------------
 
-## Task 8
+## Task 8 ✅
 
 Add the Level model.
 
