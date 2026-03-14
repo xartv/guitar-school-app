@@ -177,7 +177,7 @@ Run Prisma migration for SkillStage.
 
 ------------------------------------------------------------------------
 
-## Task 14
+## Task 14 ✅
 
 Add the YoutubeLink model.
 
@@ -191,7 +191,7 @@ Add relation to Skill.
 
 ------------------------------------------------------------------------
 
-## Task 15
+## Task 15 ✅
 
 Run Prisma migration for YoutubeLink.
 
