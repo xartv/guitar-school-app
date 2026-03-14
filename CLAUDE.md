@@ -107,6 +107,16 @@ After all code review issues are fixed:
 
 The qa-tester runs browser tests and produces a report. If issues are found, fix them.
 
+## Step 5 — Commit (mandatory)
+
+After all QA issues are fixed and the task is fully complete:
+
+→ Create a git commit with all changes.
+
+Commit message format: `<short description> (Task N)`
+
+Example: `Create Prisma client helper (Task 5)`
+
 ## Pipeline Summary
 
 ```
@@ -119,6 +129,8 @@ The qa-tester runs browser tests and produces a report. If issues are found, fix
     fix issues
         ↓
 [feature-qa-tester]     ← always
+        ↓
+   git commit           ← always
 ```
 
 ---

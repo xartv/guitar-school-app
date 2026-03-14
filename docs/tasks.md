@@ -14,7 +14,7 @@ Guidelines for the AI agent:
 
 # Phase 1 --- Project Setup
 
-## Task 1
+## Task 1 ✅
 
 Initialize a new Next.js project with the following configuration:
 
@@ -29,7 +29,7 @@ npm run dev
 
 ------------------------------------------------------------------------
 
-## Task 2
+## Task 2 ✅
 
 Install core dependencies via npm:
 
@@ -43,7 +43,7 @@ shadcn/ui will be initialized separately in Task 25 using `npx shadcn@latest ini
 
 ------------------------------------------------------------------------
 
-## Task 3
+## Task 3 ✅
 
 Initialize Prisma in the project.
 
@@ -55,7 +55,7 @@ Steps:
 
 ------------------------------------------------------------------------
 
-## Task 4
+## Task 4 ✅
 
 Configure Prisma to use SQLite.
 
@@ -69,7 +69,7 @@ dev.db
 
 ------------------------------------------------------------------------
 
-## Task 5
+## Task 5 ✅
 
 Create the Prisma client helper.
 
