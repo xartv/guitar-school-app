@@ -130,6 +130,8 @@ Example: `Create Prisma client helper (Task 5)`
         ↓
 [feature-qa-tester]     ← always
         ↓
+    fix issues
+        ↓
    git commit           ← always
 ```
 
