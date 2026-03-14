@@ -9,3 +9,11 @@ export async function createProgram(title: string) {
 
   return program
 }
+
+export async function getProgram() {
+  const program = await prisma.program.findFirst({
+    include: { levels: true },
+  })
+
+  return program
+}
