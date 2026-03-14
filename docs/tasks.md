@@ -237,7 +237,7 @@ Return the first Program from the database including Levels.
 
 ------------------------------------------------------------------------
 
-## Task 19
+## Task 19 ✅
 
 Update app/page.tsx to:
 
