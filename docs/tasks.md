@@ -425,7 +425,7 @@ Call deleteLevel action and refresh the program view.
 
 # Phase 6 --- Skill Progress
 
-## Task 31
+## Task 31 ✅
 
 Create SkillProgress component.
 
