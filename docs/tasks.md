@@ -302,7 +302,7 @@ For now use simple divs.
 
 ------------------------------------------------------------------------
 
-## Task 25
+## Task 25 ✅
 
 Initialize shadcn/ui using:
 
