@@ -36,6 +36,12 @@ export async function toggleStage(stageId: string, completed: boolean) {
   })
 }
 
+export async function addYoutubeLink(skillId: string, url: string) {
+  await prisma.youtubeLink.create({
+    data: { skillId, url },
+  })
+}
+
 export async function deleteSkill(skillId: string) {
   await prisma.$transaction([
     prisma.skillStage.deleteMany({ where: { skillId } }),

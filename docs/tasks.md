@@ -479,7 +479,7 @@ Allow updating notes text.
 
 ------------------------------------------------------------------------
 
-## Task 37
+## Task 37 ✅
 
 Create addYoutubeLink server action.
 
