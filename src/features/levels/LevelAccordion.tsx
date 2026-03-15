@@ -6,6 +6,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion"
+import AddSkillButton from "@/features/skills/AddSkillButton"
 
 type Level = { id: string; title: string }
 
@@ -16,14 +17,14 @@ interface LevelAccordionProps {
 export default function LevelAccordion({ levels }: LevelAccordionProps) {
   return (
     <div className="rounded-lg border bg-card shadow-sm px-4">
-      <Accordion>
+      <Accordion multiple>
         {levels.map((level) => (
           <AccordionItem key={level.id} value={level.id}>
             <AccordionTrigger className="text-base font-semibold">
               {level.title}
             </AccordionTrigger>
             <AccordionContent>
-              <p className="text-muted-foreground text-sm">No skills yet.</p>
+              <AddSkillButton levelId={level.id} />
             </AccordionContent>
           </AccordionItem>
         ))}

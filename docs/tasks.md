@@ -318,7 +318,7 @@ npx shadcn@latest add accordion
 
 ------------------------------------------------------------------------
 
-## Task 26
+## Task 26 ✅
 
 Replace level list with Accordion UI.
 
@@ -328,7 +328,7 @@ Each level should be collapsible.
 
 # Phase 5 --- Skills
 
-## Task 27
+## Task 27 ✅
 
 Create createSkill server action.
 
