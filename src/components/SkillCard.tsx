@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type { SkillModel } from "@/generated/prisma/models/Skill"
 import { deleteSkill } from "@/actions/skill.actions"
 import { Button } from "@/components/ui/button"
+import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X } from "lucide-react"
 
 interface SkillCardProps {
@@ -30,7 +31,10 @@ export function SkillCard({ skill }: SkillCardProps) {
 
   return (
     <div className="bg-card border rounded-[12px] p-4 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-      <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
+        <SkillProgress />
+      </div>
       <Button
         variant="ghost"
         size="sm"
