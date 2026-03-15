@@ -6,6 +6,7 @@ export async function getLevels(programId: string) {
   const levels = await prisma.level.findMany({
     where: { programId },
     orderBy: { order: "asc" },
+    include: { skills: { orderBy: { createdAt: "asc" } } },
   })
 
   return levels
