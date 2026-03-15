@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
-import { deleteSkill, updateSkillNotes } from "@/actions/skill.actions"
+import { deleteSkill, updateSkillNotes, addYoutubeLink } from "@/actions/skill.actions"
 import { Button } from "@/components/ui/button"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X, Pencil } from "lucide-react"
@@ -19,6 +19,7 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
   const [isPending, setIsPending] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [notesValue, setNotesValue] = useState(skill.notes ?? "")
+  const [linkValue, setLinkValue] = useState("")
   const router = useRouter()
 
   async function handleDelete() {
@@ -42,6 +43,21 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
       router.refresh()
     } catch (error) {
       console.error("Failed to update notes:", error)
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  async function handleAddLink() {
+    const url = linkValue.trim()
+    if (!url) return
+    setIsPending(true)
+    try {
+      await addYoutubeLink(skill.id, url)
+      setLinkValue("")
+      router.refresh()
+    } catch (error) {
+      console.error("Failed to add link:", error)
     } finally {
       setIsPending(false)
     }
@@ -73,6 +89,19 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
               ))}
             </div>
           )}
+          <div className="flex gap-2">
+            <input
+              type="url"
+              className="text-sm border rounded-md px-2 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Add video URL..."
+              value={linkValue}
+              onChange={(e) => setLinkValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddLink()}
+            />
+            <Button size="sm" variant="ghost" onClick={handleAddLink} disabled={isPending || !linkValue.trim()}>
+              Add
+            </Button>
+          </div>
           {isEditing ? (
             <div className="flex flex-col gap-2">
               <textarea

@@ -499,7 +499,7 @@ Render them as clickable links.
 
 ------------------------------------------------------------------------
 
-## Task 39
+## Task 39 ✅
 
 Add input field to add new youtube links.
 
