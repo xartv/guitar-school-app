@@ -21,3 +21,11 @@ export async function createSkill(levelId: string, title: string) {
 
   return skill
 }
+
+export async function deleteSkill(skillId: string) {
+  await prisma.$transaction([
+    prisma.skillStage.deleteMany({ where: { skillId } }),
+    prisma.youtubeLink.deleteMany({ where: { skillId } }),
+    prisma.skill.delete({ where: { id: skillId } }),
+  ])
+}

@@ -370,7 +370,7 @@ Render SkillCards inside each level.
 
 ------------------------------------------------------------------------
 
-## Task 30a
+## Task 30a ✅
 
 Create deleteSkill server action.
 
