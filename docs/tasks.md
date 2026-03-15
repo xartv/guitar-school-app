@@ -433,7 +433,7 @@ Display four checkboxes representing stages.
 
 ------------------------------------------------------------------------
 
-## Task 32
+## Task 32 ✅
 
 Load stage data from the database.
 
