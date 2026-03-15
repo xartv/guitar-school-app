@@ -14,15 +14,17 @@ import AddSkillButton from "@/features/skills/AddSkillButton"
 import { SkillCard } from "@/components/SkillCard"
 import { deleteLevel } from "@/actions/level.actions"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
+import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 
-type SkillWithStages = {
+type SkillWithDetails = {
   id: string
   title: string
   notes: string | null
   stages: SkillStageModel[]
+  links: YoutubeLinkModel[]
 }
 
-type Level = { id: string; title: string; skills: SkillWithStages[] }
+type Level = { id: string; title: string; skills: SkillWithDetails[] }
 
 interface LevelAccordionProps {
   levels: Level[]
@@ -75,7 +77,7 @@ export default function LevelAccordion({ levels }: LevelAccordionProps) {
             <AccordionContent>
               <div className="flex flex-col gap-2 pb-2">
                 {level.skills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} stages={skill.stages} />
+                  <SkillCard key={skill.id} skill={skill} stages={skill.stages} links={skill.links} />
                 ))}
                 <AddSkillButton levelId={level.id} />
               </div>

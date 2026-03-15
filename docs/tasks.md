@@ -491,7 +491,7 @@ Insert new YoutubeLink.
 
 ------------------------------------------------------------------------
 
-## Task 38
+## Task 38 ✅
 
 Display youtube links in SkillCard.
 

@@ -9,7 +9,10 @@ export async function getLevels(programId: string) {
     include: {
       skills: {
         orderBy: { createdAt: "asc" },
-        include: { stages: { orderBy: { stage: "asc" } } },
+        include: {
+          stages: { orderBy: { stage: "asc" } },
+          links: true,
+        },
       },
     },
   })

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
+import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import { deleteSkill, updateSkillNotes } from "@/actions/skill.actions"
 import { Button } from "@/components/ui/button"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
@@ -11,9 +12,10 @@ import { X, Pencil } from "lucide-react"
 interface SkillCardProps {
   skill: { id: string; title: string; notes: string | null }
   stages: SkillStageModel[]
+  links: YoutubeLinkModel[]
 }
 
-export function SkillCard({ skill, stages }: SkillCardProps) {
+export function SkillCard({ skill, stages, links }: SkillCardProps) {
   const [isPending, setIsPending] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [notesValue, setNotesValue] = useState(skill.notes ?? "")
@@ -56,6 +58,21 @@ export function SkillCard({ skill, stages }: SkillCardProps) {
         <div className="flex flex-col gap-2 flex-1">
           <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
           <SkillProgress stages={stages} />
+          {links.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {links.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-500 hover:underline truncate"
+                >
+                  {link.url}
+                </a>
+              ))}
+            </div>
+          )}
           {isEditing ? (
             <div className="flex flex-col gap-2">
               <textarea
