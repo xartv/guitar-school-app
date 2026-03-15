@@ -441,7 +441,7 @@ Render correct checked state.
 
 ------------------------------------------------------------------------
 
-## Task 33
+## Task 33 ✅
 
 Implement toggleStage server action.
 
