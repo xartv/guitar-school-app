@@ -364,7 +364,7 @@ Skill title only.
 
 ------------------------------------------------------------------------
 
-## Task 30
+## Task 30 ✅
 
 Render SkillCards inside each level.
 
