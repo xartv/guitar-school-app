@@ -18,6 +18,7 @@ import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 type SkillWithStages = {
   id: string
   title: string
+  notes: string | null
   stages: SkillStageModel[]
 }
 

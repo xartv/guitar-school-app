@@ -9,7 +9,7 @@ import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X } from "lucide-react"
 
 interface SkillCardProps {
-  skill: { id: string; title: string }
+  skill: { id: string; title: string; notes: string | null }
   stages: SkillStageModel[]
 }
 
@@ -35,6 +35,9 @@ export function SkillCard({ skill, stages }: SkillCardProps) {
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
         <SkillProgress stages={stages} />
+        {skill.notes && (
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{skill.notes}</p>
+        )}
       </div>
       <Button
         variant="ghost"

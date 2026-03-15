@@ -463,7 +463,7 @@ Use optimistic UI.
 
 # Phase 7 --- Skill Details
 
-## Task 35
+## Task 35 ✅
 
 Add Notes section to SkillCard.
 
