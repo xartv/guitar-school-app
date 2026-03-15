@@ -471,7 +471,7 @@ Render notes text.
 
 ------------------------------------------------------------------------
 
-## Task 36
+## Task 36 ✅
 
 Add simple edit button for notes.
 

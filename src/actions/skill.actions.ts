@@ -22,6 +22,13 @@ export async function createSkill(levelId: string, title: string) {
   return skill
 }
 
+export async function updateSkillNotes(skillId: string, notes: string) {
+  await prisma.skill.update({
+    where: { id: skillId },
+    data: { notes },
+  })
+}
+
 export async function toggleStage(stageId: string, completed: boolean) {
   await prisma.skillStage.update({
     where: { id: stageId },
