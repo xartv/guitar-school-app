@@ -344,13 +344,13 @@ Automatically create 4 SkillStage records.
 
 ------------------------------------------------------------------------
 
-## Task 28
+## Task 28 ✅
 
 Add "Add Skill" button inside each level.
 
 ------------------------------------------------------------------------
 
-## Task 29
+## Task 29 ✅
 
 Create SkillCard component.
 
