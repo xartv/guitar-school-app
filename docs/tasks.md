@@ -294,7 +294,7 @@ Create a new level.
 
 ------------------------------------------------------------------------
 
-## Task 24
+## Task 24 ✅
 
 Render Levels as a list on the main page.
 
