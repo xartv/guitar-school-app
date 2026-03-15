@@ -388,7 +388,7 @@ Use Prisma cascading delete or explicit sequential deletes.
 
 ------------------------------------------------------------------------
 
-## Task 30b
+## Task 30b ✅
 
 Add delete button to SkillCard.
 
