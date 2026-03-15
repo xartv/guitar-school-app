@@ -413,7 +413,7 @@ Behavior:
 
 ------------------------------------------------------------------------
 
-## Task 30d
+## Task 30d ✅
 
 Add delete button to each Level in the Accordion header.
 
