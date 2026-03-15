@@ -398,7 +398,7 @@ Call deleteSkill action and refresh the level.
 
 ------------------------------------------------------------------------
 
-## Task 30c
+## Task 30c ✅
 
 Create deleteLevel server action.
 
