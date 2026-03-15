@@ -1,21 +1,24 @@
 "use client"
 
 import { Checkbox } from "@/components/ui/checkbox"
+import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import styles from "./SkillProgress.module.css"
 
-const STAGES = [1, 2, 3, 4]
+interface SkillProgressProps {
+  stages: SkillStageModel[]
+}
 
-export function SkillProgress() {
+export function SkillProgress({ stages }: SkillProgressProps) {
   return (
     <div className={styles.container}>
       <span className={styles.label}>Stages</span>
       <div className={styles.stages}>
-        {STAGES.map((stage) => (
-          <div key={stage} className={styles.stage}>
-            {/* TODO: connect to real data in Task 32, enable interaction in Task 34 */}
-            <Checkbox id={`stage-${stage}`} defaultChecked={false} />
-            <label htmlFor={`stage-${stage}`} className={styles.stageLabel}>
-              {stage}
+        {stages.map((s) => (
+          <div key={s.id} className={styles.stage}>
+            {/* TODO: enable interaction in Task 34 */}
+            <Checkbox id={s.id} checked={s.completed} />
+            <label htmlFor={s.id} className={styles.stageLabel}>
+              {s.stage}
             </label>
           </div>
         ))}

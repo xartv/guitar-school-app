@@ -2,17 +2,18 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import type { SkillModel } from "@/generated/prisma/models/Skill"
+import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import { deleteSkill } from "@/actions/skill.actions"
 import { Button } from "@/components/ui/button"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X } from "lucide-react"
 
 interface SkillCardProps {
-  skill: SkillModel
+  skill: { id: string; title: string }
+  stages: SkillStageModel[]
 }
 
-export function SkillCard({ skill }: SkillCardProps) {
+export function SkillCard({ skill, stages }: SkillCardProps) {
   const [isPending, setIsPending] = useState(false)
   const router = useRouter()
 
@@ -33,7 +34,7 @@ export function SkillCard({ skill }: SkillCardProps) {
     <div className="bg-card border rounded-[12px] p-4 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
-        <SkillProgress />
+        <SkillProgress stages={stages} />
       </div>
       <Button
         variant="ghost"

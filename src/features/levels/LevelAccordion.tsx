@@ -13,9 +13,15 @@ import { X, ChevronDown, ChevronUp } from "lucide-react"
 import AddSkillButton from "@/features/skills/AddSkillButton"
 import { SkillCard } from "@/components/SkillCard"
 import { deleteLevel } from "@/actions/level.actions"
-import type { SkillModel } from "@/generated/prisma/models/Skill"
+import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 
-type Level = { id: string; title: string; skills: SkillModel[] }
+type SkillWithStages = {
+  id: string
+  title: string
+  stages: SkillStageModel[]
+}
+
+type Level = { id: string; title: string; skills: SkillWithStages[] }
 
 interface LevelAccordionProps {
   levels: Level[]
@@ -68,7 +74,7 @@ export default function LevelAccordion({ levels }: LevelAccordionProps) {
             <AccordionContent>
               <div className="flex flex-col gap-2 pb-2">
                 {level.skills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} />
+                  <SkillCard key={skill.id} skill={skill} stages={skill.stages} />
                 ))}
                 <AddSkillButton levelId={level.id} />
               </div>
