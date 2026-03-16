@@ -20,6 +20,7 @@ type SkillWithDetails = {
   id: string
   title: string
   notes: string | null
+  completed: boolean
   stages: SkillStageModel[]
   links: YoutubeLinkModel[]
 }
@@ -77,7 +78,7 @@ export default function LevelAccordion({ levels }: LevelAccordionProps) {
             <AccordionContent>
               <div className="flex flex-col gap-2 pb-2">
                 {level.skills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} stages={skill.stages} links={skill.links} />
+                  <SkillCard key={skill.id} skill={skill} stages={skill.stages} links={skill.links} completed={skill.completed} />
                 ))}
                 <AddSkillButton levelId={level.id} />
               </div>

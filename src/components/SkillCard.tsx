@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import { deleteSkill, updateSkillNotes, addYoutubeLink } from "@/actions/skill.actions"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
@@ -14,9 +15,10 @@ interface SkillCardProps {
   skill: { id: string; title: string; notes: string | null }
   stages: SkillStageModel[]
   links: YoutubeLinkModel[]
+  completed?: boolean
 }
 
-export function SkillCard({ skill, stages, links }: SkillCardProps) {
+export function SkillCard({ skill, stages, links, completed = false }: SkillCardProps) {
   const [isPending, setIsPending] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [notesValue, setNotesValue] = useState(skill.notes ?? "")
@@ -70,7 +72,7 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={cn("hover:shadow-md transition-shadow", completed && "ring-2 ring-green-500")}>
       <CardHeader>
         <CardTitle>{skill.title}</CardTitle>
         <CardAction>

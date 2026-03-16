@@ -551,7 +551,7 @@ Automatically create next level.
 
 # Phase 9 --- UI Improvements
 
-## Task 44
+## Task 44 ✅
 
 Style SkillCard using shadcn Card component.
 
