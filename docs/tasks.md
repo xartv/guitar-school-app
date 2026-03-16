@@ -609,6 +609,19 @@ Ensure the UI refreshes correctly after mutations.
 
 Future tasks should be added here. These are enhancements beyond the MVP scope.
 
+## Task 49 ✅
+
+Add inline editing for level titles directly in the accordion header.
+
+Behavior:
+
+- Hover over a level header to reveal a pencil icon button
+- Click the pencil icon to enter edit mode (title replaced with an input)
+- Press Enter or blur to save; press Escape to cancel
+- Calls `updateLevelTitle` server action with validation and `revalidatePath`
+
+------------------------------------------------------------------------
+
 Reference candidates from `docs/spec.md` section "Future Improvements":
 
 -   Authentication
