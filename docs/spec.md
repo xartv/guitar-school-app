@@ -1,5 +1,11 @@
 # Electric Guitar Practice Program App --- Project Specification
 
+> **STATUS: MVP COMPLETE** (as of 2026-03-17)
+> All MVP features described in this document have been implemented.
+> The project is now in **post-MVP development** phase.
+> New features should be taken from the "Future Improvements" section (§14)
+> and added as tasks in `docs/tasks.md`.
+
 ## 1. Project Overview
 
 This project is a personal learning management application for

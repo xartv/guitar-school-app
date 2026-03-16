@@ -1,5 +1,12 @@
 # Architecture Specification
 
+> **STATUS: MVP COMPLETE** (as of 2026-03-17)
+> The architecture described here is fully implemented in the codebase.
+> The project is in **post-MVP development** phase.
+> New features must follow these architectural principles.
+> Libraries listed as "future" (Zustand, React Query, PostgreSQL) may now be
+> introduced when there is a concrete need, as the MVP constraint no longer applies.
+
 ## Tech Stack
 
 -   Next.js (App Router)

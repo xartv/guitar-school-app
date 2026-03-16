@@ -1,5 +1,10 @@
 # UI Specification
 
+> **STATUS: MVP COMPLETE** (as of 2026-03-17)
+> All MVP UI components described in this document are implemented.
+> The project is in **post-MVP development** phase.
+> UX enhancements and new UI features should follow these existing conventions.
+
 ## Main Layout
 
 The application shows a Program containing Levels.

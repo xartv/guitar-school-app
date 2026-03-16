@@ -1,5 +1,10 @@
 # MVP Implementation Tasks
 
+> **STATUS: MVP COMPLETE** — All 48 tasks have been implemented and verified (as of 2026-03-17).
+> The foundation is fully built. Further work is **post-MVP feature development**.
+> New tasks should be added after the existing list and should focus on enhancements,
+> new features, or improvements — not on re-implementing MVP functionality.
+
 This document defines a step‑by‑step task list for implementing the MVP
 of the Electric Guitar Practice Program App.
 
@@ -587,13 +592,30 @@ Ensure the UI refreshes correctly after mutations.
 
 # Final MVP Checklist
 
-The MVP is complete when:
+> **All items below are DONE. MVP is fully implemented.**
 
--   Program can be created
--   Levels can be added
--   Skills can be added
--   Skills contain 4 stages
--   Stage completion works
--   Notes can be edited
--   Youtube links can be added
--   New level is created automatically after completion
+-   ✅ Program can be created
+-   ✅ Levels can be added
+-   ✅ Skills can be added
+-   ✅ Skills contain 4 stages
+-   ✅ Stage completion works
+-   ✅ Notes can be edited
+-   ✅ Youtube links can be added
+-   ✅ New level is created automatically after completion
+
+------------------------------------------------------------------------
+
+# Post-MVP Development
+
+Future tasks should be added here. These are enhancements beyond the MVP scope.
+
+Reference candidates from `docs/spec.md` section "Future Improvements":
+
+-   Authentication
+-   Multiple programs
+-   Drag & drop skill ordering
+-   Calendar practice tracking
+-   Video embedding (YouTube player)
+-   Progress dashboard
+-   Statistics
+-   Mobile optimization
