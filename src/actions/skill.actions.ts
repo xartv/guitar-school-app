@@ -42,6 +42,23 @@ export async function addYoutubeLink(skillId: string, url: string) {
   })
 }
 
+export async function checkSkillCompletion(skillId: string): Promise<boolean> {
+  const stages = await prisma.skillStage.findMany({
+    where: { skillId },
+  })
+
+  if (stages.length === 0) return false
+
+  const completed = stages.every((stage) => stage.completed)
+
+  await prisma.skill.update({
+    where: { id: skillId },
+    data: { completed },
+  })
+
+  return completed
+}
+
 export async function deleteSkill(skillId: string) {
   await prisma.$transaction([
     prisma.skillStage.deleteMany({ where: { skillId } }),
