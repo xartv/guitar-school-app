@@ -557,7 +557,7 @@ Style SkillCard using shadcn Card component.
 
 ------------------------------------------------------------------------
 
-## Task 45
+## Task 45 ✅
 
 Add visual state for completed skills.
 

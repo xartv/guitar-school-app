@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
+import ReactMarkdown from "react-markdown"
 import { deleteSkill, updateSkillNotes, addYoutubeLink } from "@/actions/skill.actions"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -139,7 +140,9 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
           ) : (
             <>
               {skill.notes && (
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{skill.notes}</p>
+                <div className="text-sm text-muted-foreground prose prose-sm max-w-none">
+                  <ReactMarkdown>{skill.notes}</ReactMarkdown>
+                </div>
               )}
               <Button
                 size="sm"
