@@ -6,6 +6,7 @@ import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import { deleteSkill, updateSkillNotes, addYoutubeLink } from "@/actions/skill.actions"
 import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X, Pencil } from "lucide-react"
 
@@ -69,10 +70,23 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
   }
 
   return (
-    <div className="bg-card border rounded-[12px] p-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-2 flex-1">
-          <h3 className="text-sm font-medium text-card-foreground">{skill.title}</h3>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader>
+        <CardTitle>{skill.title}</CardTitle>
+        <CardAction>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isPending}
+            aria-label="Delete skill"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
           <SkillProgress stages={stages} />
           {links.length > 0 && (
             <div className="flex flex-col gap-1">
@@ -137,16 +151,7 @@ export function SkillCard({ skill, stages, links }: SkillCardProps) {
             </>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDelete}
-          disabled={isPending}
-          aria-label="Delete skill"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

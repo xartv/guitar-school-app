@@ -537,7 +537,7 @@ Create a new empty level.
 
 ------------------------------------------------------------------------
 
-## Task 43
+## Task 43 ✅
 
 After stage toggle:
 
