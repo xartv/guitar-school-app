@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 
 export async function getLevels(programId: string) {
@@ -65,6 +66,16 @@ export async function createNextLevel(levelId: string) {
       programId: level.programId,
     },
   })
+}
+
+export async function updateLevelTitle(levelId: string, title: string) {
+  const trimmed = title.trim()
+  if (!trimmed || trimmed.length > 200) return
+  await prisma.level.update({
+    where: { id: levelId },
+    data: { title: trimmed },
+  })
+  revalidatePath("/")
 }
 
 export async function createLevel(programId: string) {
