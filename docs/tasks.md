@@ -573,13 +573,13 @@ Add simple markdown rendering for notes using react-markdown.
 
 ------------------------------------------------------------------------
 
-## Task 47
+## Task 47 ✅
 
 Add loading states for server actions.
 
 ------------------------------------------------------------------------
 
-## Task 48
+## Task 48 ✅
 
 Ensure the UI refreshes correctly after mutations.
 
