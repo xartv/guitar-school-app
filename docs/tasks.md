@@ -507,7 +507,7 @@ Add input field to add new youtube links.
 
 # Phase 8 --- Completion Logic
 
-## Task 40
+## Task 40 ✅
 
 Create function checkSkillCompletion.
 
