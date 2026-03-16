@@ -38,14 +38,12 @@ export async function deleteLevel(levelId: string) {
 export async function checkLevelCompletion(levelId: string): Promise<boolean> {
   const skills = await prisma.skill.findMany({
     where: { levelId },
-    include: { stages: true },
+    select: { completed: true },
   })
 
   if (skills.length === 0) return false
 
-  return skills.every((skill) =>
-    skill.stages.length > 0 && skill.stages.every((stage) => stage.completed)
-  )
+  return skills.every((skill) => skill.completed)
 }
 
 export async function createNextLevel(levelId: string) {

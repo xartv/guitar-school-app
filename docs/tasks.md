@@ -527,7 +527,7 @@ Level completed if all skills completed.
 
 ------------------------------------------------------------------------
 
-## Task 42
+## Task 42 ✅
 
 Create createNextLevel server action.
 

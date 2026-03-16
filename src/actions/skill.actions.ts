@@ -1,6 +1,8 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { checkLevelCompletion, createNextLevel } from "@/actions/level.actions"
 
 export async function createSkill(levelId: string, title: string) {
   const skill = await prisma.skill.create({
@@ -30,10 +32,30 @@ export async function updateSkillNotes(skillId: string, notes: string) {
 }
 
 export async function toggleStage(stageId: string, completed: boolean) {
-  await prisma.skillStage.update({
+  const stage = await prisma.skillStage.update({
     where: { id: stageId },
     data: { completed },
+    select: { skill: { select: { id: true, levelId: true } } },
   })
+
+  const { id: skillId, levelId } = stage.skill
+
+  await checkSkillCompletion(skillId)
+
+  const levelCompleted = await checkLevelCompletion(levelId)
+  if (levelCompleted) {
+    const currentLevel = await prisma.level.findUniqueOrThrow({
+      where: { id: levelId },
+      select: { order: true, programId: true },
+    })
+    const nextLevelExists = await prisma.level.findFirst({
+      where: { programId: currentLevel.programId, order: { gt: currentLevel.order } },
+    })
+    if (!nextLevelExists) {
+      await createNextLevel(levelId)
+      revalidatePath("/")
+    }
+  }
 }
 
 export async function addYoutubeLink(skillId: string, url: string) {
