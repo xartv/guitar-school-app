@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
-import { X, Pencil } from "lucide-react"
+import { X, Pencil, Loader2 } from "lucide-react"
 
 interface SkillCardProps {
   skill: { id: string; title: string; notes: string | null }
@@ -84,7 +84,7 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
             disabled={isPending}
             aria-label="Delete skill"
           >
-            <X className="h-4 w-4" />
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
           </Button>
         </CardAction>
       </CardHeader>
@@ -116,7 +116,7 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
               onKeyDown={(e) => e.key === "Enter" && handleAddLink()}
             />
             <Button size="sm" variant="ghost" onClick={handleAddLink} disabled={isPending || !linkValue.trim()}>
-              Add
+              {isPending ? "Adding..." : "Add"}
             </Button>
           </div>
           {isEditing ? (
@@ -130,7 +130,7 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
               />
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleSaveNotes} disabled={isPending}>
-                  Save
+                  {isPending ? "Saving..." : "Save"}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isPending}>
                   Cancel

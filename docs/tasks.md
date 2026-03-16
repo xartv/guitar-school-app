@@ -567,7 +567,7 @@ green border
 
 ------------------------------------------------------------------------
 
-## Task 46
+## Task 46 ✅
 
 Add simple markdown rendering for notes using react-markdown.
 
