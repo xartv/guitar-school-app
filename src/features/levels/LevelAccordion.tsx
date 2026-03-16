@@ -171,13 +171,10 @@ function LevelAccordionItem({ level, index }: { level: Level; index: number }) {
                 {completedCount}/{totalCount}
               </span>
             )}
-
-            {/* Chevron */}
-            <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-aria-expanded/trigger:rotate-180" />
           </AccordionPrimitive.Trigger>
         )}
 
-        {/* Pencil edit button — sibling to Trigger, not nested inside it */}
+        {/* Pencil edit button */}
         {!isEditing && (
           <Button
             variant="ghost"
@@ -191,6 +188,17 @@ function LevelAccordionItem({ level, index }: { level: Level; index: number }) {
         )}
 
         <DeleteLevelButton levelId={level.id} />
+
+        {/* Chevron — separate trigger at the far right */}
+        {!isEditing ? (
+          <AccordionPrimitive.Trigger className="group/chevron h-8 w-8 flex items-center justify-center rounded text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors hover:text-foreground">
+            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 group-aria-expanded/chevron:rotate-180" />
+          </AccordionPrimitive.Trigger>
+        ) : (
+          <span className="h-8 w-8 flex items-center justify-center text-muted-foreground">
+            <ChevronDown className="h-4 w-4 shrink-0" />
+          </span>
+        )}
       </AccordionPrimitive.Header>
 
       <AccordionContent>
