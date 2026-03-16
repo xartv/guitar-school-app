@@ -48,6 +48,27 @@ export async function checkLevelCompletion(levelId: string): Promise<boolean> {
   )
 }
 
+export async function createNextLevel(levelId: string) {
+  const level = await prisma.level.findUniqueOrThrow({
+    where: { id: levelId },
+    select: { programId: true },
+  })
+
+  const maxOrder = await prisma.level.aggregate({
+    where: { programId: level.programId },
+    _max: { order: true },
+  })
+  const order = (maxOrder._max.order ?? 0) + 1
+
+  return prisma.level.create({
+    data: {
+      title: `Level ${order}`,
+      order,
+      programId: level.programId,
+    },
+  })
+}
+
 export async function createLevel(programId: string) {
   const count = await prisma.level.count({ where: { programId } })
   const order = count + 1

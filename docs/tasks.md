@@ -517,7 +517,7 @@ Skill is completed if all stages are completed.
 
 ------------------------------------------------------------------------
 
-## Task 41
+## Task 41 ✅
 
 Create function checkLevelCompletion.
 
