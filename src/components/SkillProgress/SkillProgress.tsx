@@ -2,9 +2,10 @@
 
 import { useOptimistic, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Checkbox } from "@/components/ui/checkbox"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import { toggleStage } from "@/actions/skill.actions"
+import { Check } from "lucide-react"
+import { cn } from "@/lib/utils"
 import styles from "./SkillProgress.module.css"
 
 interface SkillProgressProps {
@@ -28,20 +29,44 @@ export function SkillProgress({ stages }: SkillProgressProps) {
     })
   }
 
+  const completedCount = optimisticStages.filter((s) => s.completed).length
+
   return (
     <div className={styles.container}>
-      <span className={styles.label}>Stages</span>
-      <div className={styles.stages}>
+      <div className={styles.header}>
+        <span className={styles.label}>Progress</span>
+        <span className={styles.progress}>
+          {completedCount}/{optimisticStages.length}
+        </span>
+      </div>
+
+      <div className={styles.stages} role="group" aria-label="Practice stages">
         {optimisticStages.map((s) => (
-          <div key={s.id} className={styles.stage}>
-            <Checkbox
-              id={s.id}
-              checked={s.completed}
-              onCheckedChange={(checked) => handleToggle(s.id, checked === true)}
-            />
-            <label htmlFor={s.id} className={styles.stageLabel}>
+          <div
+            key={s.id}
+            className={styles.stage}
+            role="checkbox"
+            aria-checked={s.completed}
+            aria-label={`Stage ${s.stage}`}
+            tabIndex={0}
+            onClick={() => handleToggle(s.id, !s.completed)}
+            onKeyDown={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                e.preventDefault()
+                handleToggle(s.id, !s.completed)
+              }
+            }}
+          >
+            <div className={cn(styles.pill, s.completed && styles.pillCompleted)}>
+              {s.completed ? (
+                <Check className={styles.checkIcon} />
+              ) : (
+                <span className={styles.dot} />
+              )}
+            </div>
+            <span className={cn(styles.stageLabel, s.completed && styles.stageLabelCompleted)}>
               {s.stage}
-            </label>
+            </span>
           </div>
         ))}
       </div>

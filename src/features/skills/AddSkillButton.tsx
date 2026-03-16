@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createSkill } from "@/actions/skill.actions"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Plus, Loader2 } from "lucide-react"
 
 interface AddSkillButtonProps {
   levelId: string
@@ -34,33 +33,42 @@ export default function AddSkillButton({ levelId }: AddSkillButtonProps) {
 
   if (!isOpen) {
     return (
-      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-        + Add Skill
-      </Button>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="inline-flex items-center gap-1.5 w-full px-3 py-2 text-xs font-medium rounded-lg border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 transition-colors"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Add Skill
+      </button>
     )
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
-      <Input
+      <input
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Skill title"
+        placeholder="Skill title..."
         autoFocus
         disabled={isPending}
+        className="flex-1 text-xs bg-input/50 border border-border rounded-lg px-3 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
       />
-      <Button type="submit" size="sm" disabled={isPending || !title.trim()}>
+      <button
+        type="submit"
+        disabled={isPending || !title.trim()}
+        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-opacity"
+      >
+        {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
         {isPending ? "Adding..." : "Add"}
-      </Button>
-      <Button
+      </button>
+      <button
         type="button"
-        variant="ghost"
-        size="sm"
         onClick={() => { setIsOpen(false); setTitle("") }}
+        className="px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50 transition-colors"
       >
         Cancel
-      </Button>
+      </button>
     </form>
   )
 }
