@@ -18,7 +18,8 @@ build/
 .env.*.local
 
 # tools
-.claude/
+.claude/settings.local.json
+.claude/agent-memory/
 .playwright-mcp/
 
 # misc
