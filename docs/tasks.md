@@ -689,3 +689,11 @@ Reference candidates from `docs/spec.md` section "Future Improvements":
 -   Progress dashboard
 -   Statistics
 -   Mobile optimization
+
+------------------------------------------------------------------------
+
+## Task 53 ✅
+
+Убрать отображение нумерации для уровней.
+
+Удалить круглый бейдж с порядковым номером уровня из заголовка аккордеона.
