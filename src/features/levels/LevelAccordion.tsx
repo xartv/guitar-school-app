@@ -68,7 +68,7 @@ function DeleteLevelButton({ levelId }: { levelId: string }) {
   )
 }
 
-function LevelAccordionItem({ level, index }: { level: Level; index: number }) {
+function LevelAccordionItem({ level }: { level: Level }) {
   const [isEditing, setIsEditing] = useState(false)
   const [titleValue, setTitleValue] = useState(level.title)
   const [isPendingSave, setIsPendingSave] = useState(false)
@@ -135,10 +135,6 @@ function LevelAccordionItem({ level, index }: { level: Level; index: number }) {
       <AccordionPrimitive.Header className="flex items-center pl-5 pr-2">
         {isEditing ? (
           <div className="flex flex-1 items-center gap-3 py-4">
-            {/* Level number badge */}
-            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center border border-primary/20">
-              {index + 1}
-            </span>
             <Input
               ref={inputRef}
               value={titleValue}
@@ -151,11 +147,6 @@ function LevelAccordionItem({ level, index }: { level: Level; index: number }) {
           </div>
         ) : (
           <AccordionPrimitive.Trigger className="group/trigger relative flex flex-1 items-center gap-3 py-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
-            {/* Level number badge */}
-            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center border border-primary/20">
-              {index + 1}
-            </span>
-
             {/* Level title */}
             <span className="text-base font-semibold text-foreground">
               {titleValue}
@@ -226,8 +217,8 @@ export default function LevelAccordion({ levels }: LevelAccordionProps) {
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       <Accordion multiple>
-        {levels.map((level, index) => (
-          <LevelAccordionItem key={level.id} level={level} index={index} />
+        {levels.map((level) => (
+          <LevelAccordionItem key={level.id} level={level} />
         ))}
       </Accordion>
     </div>
