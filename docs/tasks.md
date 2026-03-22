@@ -628,6 +628,57 @@ Behavior:
 
 ------------------------------------------------------------------------
 
+## Task 51 ✅
+
+Make SkillCard collapsible (accordion-style).
+
+The SkillCard should support a collapsed and expanded state, similar to how `LevelAccordionItem` works.
+
+Behavior:
+
+- By default, each SkillCard is **collapsed** — it shows only the card header row (skill title + compact progress indicator + collapse chevron).
+- Clicking anywhere on the header row (or just the chevron) expands/collapses the card body.
+- When **expanded**, the full card content is visible: SkillProgress, video links, notes, and the delete button.
+- When **collapsed**, the header shows:
+  - Skill title (left-aligned)
+  - Compact progress indicator, e.g. `2/4` or filled dots/pips representing completed stages (right side, before the chevron)
+  - A `ChevronDown` icon at the far right that rotates 180° when expanded
+  - The delete button should remain accessible when collapsed (revealed on hover, as it is today)
+- Completed skills (all 4 stages done) should show the green completed ring/border on the card regardless of collapsed/expanded state.
+- The collapsed/expanded state is **local React state** only — no persistence required.
+
+Implementation notes:
+
+- Use the `AccordionPrimitive` from `@base-ui/react/accordion` (already installed, used in `LevelAccordion.tsx`) rather than a custom toggle, to get the animated height transition via `AccordionContent`.
+- Alternatively, a simple `useState(false)` with a `max-height` CSS transition via CSS Modules is acceptable if the accordion primitive causes nesting issues (accordion inside accordion).
+- The compact progress summary in the collapsed header should derive from the `stages` prop already passed to `SkillCard` — no new data fetching needed.
+- Do not remove or restructure any existing server action calls (`deleteSkill`, `updateSkillNotes`, `addYoutubeLink`, `toggleStage`) — they stay inside the card body.
+- The card should start **collapsed** by default so levels with many skills are not overwhelming.
+
+------------------------------------------------------------------------
+
+## Task 52 ✅
+
+Add a compact progress indicator to the SkillCard collapsed header.
+
+This is a sub-task of Task 51 that focuses on the visual design of the collapsed state summary.
+
+Behavior:
+
+- When the card is collapsed, display a row of 4 small stage pips (filled circle = completed, empty circle = not completed) to the left of the chevron.
+- The pip style should be consistent with the existing `SkillProgress` pill style from `SkillProgress.tsx`.
+- If the skill is fully completed, show a small `✓ Done` badge (similar to the level's "✓ Complete" badge in `LevelAccordionItem`) instead of or alongside the pips.
+- The progress pips must be read-only in the collapsed header — clicking them should NOT toggle stages. The full interactive `SkillProgress` component is still rendered in the expanded body.
+
+Implementation notes:
+
+- Extract a new small presentational component `SkillProgressPips` (or similar name) that renders read-only stage indicators.
+- Pass `stages` and `completed` props from `SkillCard` into this component.
+- Place it in the collapsed header row, between the skill title and the chevron.
+- Style with CSS Modules or Tailwind inline classes consistent with the existing `SkillProgress.module.css` visual language.
+
+------------------------------------------------------------------------
+
 Reference candidates from `docs/spec.md` section "Future Improvements":
 
 -   Authentication
