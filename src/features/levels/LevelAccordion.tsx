@@ -22,6 +22,7 @@ type SkillWithDetails = {
   id: string
   title: string
   notes: string | null
+  tempo: number | null
   completed: boolean
   stages: SkillStageModel[]
   links: YoutubeLinkModel[]

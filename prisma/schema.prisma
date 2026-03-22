@@ -28,6 +28,7 @@ model Skill {
   id        String       @id @default(cuid())
   title     String
   notes     String?
+  tempo     Int?
   completed Boolean      @default(false)
   levelId   String
   createdAt DateTime     @default(now())

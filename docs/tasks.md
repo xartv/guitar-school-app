@@ -687,6 +687,77 @@ Implementation notes:
 
 ------------------------------------------------------------------------
 
+## Task 54 ✅
+
+Add an optional `tempo` field (integer BPM) to the `Skill` model in Prisma schema.
+
+Schema change:
+
+- Add `tempo Int?` to the `Skill` model in `prisma/schema.prisma`.
+
+Run a migration after the schema change using `mcp__prisma-local__migrate-dev` with migration name `add-skill-tempo`.
+
+------------------------------------------------------------------------
+
+## Task 55 ✅
+
+Add a `updateSkillTempo` server action to `src/actions/skill.actions.ts`.
+
+The action accepts `skillId: string` and `tempo: number | null`.
+
+Behavior:
+
+- Update `skill.tempo` in the database via Prisma.
+- Call `revalidatePath("/")` after the update.
+
+Input validation:
+
+- If `tempo` is not null, it must be a positive integer (1–300 BPM). Throw a descriptive error if the value is out of range.
+
+------------------------------------------------------------------------
+
+## Task 56 ✅
+
+Update the `SkillCard` component to support the tempo field.
+
+The `skill` prop currently has the shape `{ id: string; title: string; notes: string | null }`. Extend it to also include `tempo: number | null`.
+
+Update all call-sites that pass `skill` into `SkillCard` (typically in the Level/page render) to include the `tempo` field from the Prisma query result.
+
+No UI changes in this task — just ensure the prop flows through without TypeScript errors and the existing UI is unaffected.
+
+Technical notes:
+
+- Check that Prisma queries that fetch skills already select or include `tempo`. If not, add it.
+- The `SkillCard` component currently imports types from `@/generated/prisma/models/SkillStage` — follow the same pattern for the skill shape if a generated model type is available, otherwise extend the inline interface.
+
+------------------------------------------------------------------------
+
+## Task 57 ✅
+
+Add tempo display and editing UI to `SkillCard`.
+
+Behavior:
+
+- If `skill.tempo` is `null` (no tempo set): show a small "Add tempo" toggle button in the collapsed header row, between the skill title and the progress pips. Clicking it reveals a compact inline BPM input inside the card body (not in the header).
+- If `skill.tempo` is set: always display it as a read-only badge (e.g. `120 BPM`) in the collapsed header row, between the title and the progress pips. This badge must be visible even when the card is collapsed.
+- When the card is expanded, the tempo section in the body shows:
+  - The current BPM value with an edit (pencil) button, OR
+  - An inline number input if the user is in edit mode.
+  - A "Clear" button to remove the tempo (set to null).
+- Saving calls `updateSkillTempo`. Use optimistic local state during the async call (show a loading indicator, disable controls).
+- Cancelling edit restores the previous value.
+
+UI / styling notes:
+
+- The collapsed-header tempo badge should follow the same visual language as the `SkillProgressPips` component — small, muted, compact.
+- The "Add tempo" button (when no tempo is set) should look like the existing "Add notes" ghost button inside the card body — text+icon, `variant="ghost"`, small size.
+- The BPM number input should be narrow (e.g. `w-20`) and accept only integers. Use `type="number"` with `min=1 max=300`.
+- Style the tempo section in the card body using the existing CSS Modules file (`SkillCard.module.css`) or inline Tailwind classes consistent with the rest of the card.
+- Do NOT add new shadcn/ui components — use existing ones (`Button`, `Card`) and plain HTML inputs.
+
+------------------------------------------------------------------------
+
 Reference candidates from `docs/spec.md` section "Future Improvements":
 
 -   Authentication

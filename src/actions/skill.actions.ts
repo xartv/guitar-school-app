@@ -31,6 +31,17 @@ export async function updateSkillNotes(skillId: string, notes: string) {
   })
 }
 
+export async function updateSkillTempo(skillId: string, tempo: number | null) {
+  if (tempo !== null && (tempo < 1 || tempo > 300 || !Number.isInteger(tempo))) {
+    throw new Error("Tempo must be an integer between 1 and 300 BPM")
+  }
+  await prisma.skill.update({
+    where: { id: skillId },
+    data: { tempo },
+  })
+  revalidatePath("/")
+}
+
 export async function toggleStage(stageId: string, completed: boolean) {
   const stage = await prisma.skillStage.update({
     where: { id: stageId },

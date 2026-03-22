@@ -75,3 +75,42 @@
 .bodyOpen .bodyInner {
   overflow: visible;
 }
+
+.tempoBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.tempoRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tempoEditRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tempoInput {
+  width: 80px;
+  font-size: 0.75rem;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  color: var(--foreground);
+  outline: none;
+}
+
+.tempoInput:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
