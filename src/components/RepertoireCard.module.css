@@ -1,7 +1,7 @@
 .headerRow {
   display: flex;
   align-items: center;
-  padding: 4px 8px 4px 0;
+  padding: 4px 8px 4px 8px;
 }
 
 .trigger {
@@ -34,8 +34,7 @@
 }
 
 .titleCompleted {
-  text-decoration: line-through;
-  opacity: 0.5;
+  color: var(--muted-foreground);
 }
 
 .body {

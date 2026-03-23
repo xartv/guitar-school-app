@@ -12,8 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { X, Pencil, Loader2, ChevronDown } from "lucide-react"
+import { X, Pencil, Loader2, ChevronDown, CheckCircle2, Circle } from "lucide-react"
 import styles from "./RepertoireCard.module.css"
 
 interface RepertoireCardProps {
@@ -31,13 +30,14 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
 
   const router = useRouter()
 
-  async function handleToggleCompleted(checked: boolean) {
-    setCompleted(checked)
+  async function handleToggleCompleted() {
+    const next = !completed
+    setCompleted(next)
     try {
-      await toggleRepertoireItemCompleted(item.id, checked)
+      await toggleRepertoireItemCompleted(item.id, next)
       router.refresh()
     } catch (error) {
-      setCompleted(!checked)
+      setCompleted(!next)
       console.error("Failed to toggle completion:", error)
     }
   }
@@ -91,29 +91,20 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
   return (
     <Card
       className={cn(
-        "group/card card-hover border border-border bg-card shadow-sm rounded-xl overflow-hidden",
-        completed && "ring-completed border-transparent"
+        "group/card card-hover border border-border bg-card shadow-sm rounded-xl overflow-hidden gap-0",
+        completed && "bg-emerald-500/5"
       )}
     >
       {/* Header row — always visible */}
       <div className={styles.headerRow}>
-        {/* Completion checkbox — sibling of trigger */}
-        <Checkbox
-          checked={completed}
-          onCheckedChange={(checked) => handleToggleCompleted(checked === true)}
-          aria-label="Mark as done"
-          className="shrink-0"
-        />
-
-        {/* Toggle trigger (title + chevron) */}
+        {/* Toggle trigger (title + done badge) */}
         <button className={styles.trigger} onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen}>
           <span className={cn(styles.title, completed && styles.titleCompleted)}>{item.title}</span>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
-              isOpen && "rotate-180"
-            )}
-          />
+          {completed && (
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/20 shrink-0">
+              ✓ Done
+            </span>
+          )}
         </button>
 
         {/* Delete button — sibling of trigger */}
@@ -131,12 +122,27 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
             <X className="h-3.5 w-3.5" />
           )}
         </Button>
+
+        {/* Chevron — far right, outside trigger */}
+        <button
+          className="p-2 shrink-0 text-muted-foreground focus:outline-none"
+          onClick={() => setIsOpen((o) => !o)}
+          tabIndex={-1}
+          aria-hidden
+        >
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              isOpen && "rotate-180"
+            )}
+          />
+        </button>
       </div>
 
       {/* Collapsible body */}
       <div className={cn(styles.body, isOpen && styles.bodyOpen)} inert={!isOpen || undefined}>
         <div className={styles.bodyInner}>
-          <CardContent className="px-4 pb-4 pt-0 flex flex-col gap-3">
+          <CardContent className="px-4 pb-4 pt-3 flex flex-col gap-3">
             {/* Video links */}
             <div className="flex flex-col gap-1.5">
               {links.length > 0 && (
@@ -235,17 +241,37 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
 
             <div className="h-px bg-border" />
 
-            {/* Delete button in body */}
-            <Button
-              size="sm"
-              variant="ghost"
-              className="self-start h-6 px-0 text-xs text-destructive hover:text-destructive/80 gap-1"
-              onClick={handleDelete}
-              disabled={isPending}
-            >
-              <X className="h-3 w-3" />
-              Delete
-            </Button>
+            {/* Actions row: complete + delete */}
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "h-6 px-0 text-xs gap-1",
+                  completed
+                    ? "text-emerald-500 hover:text-emerald-600"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                onClick={handleToggleCompleted}
+                disabled={isPending}
+              >
+                {completed
+                  ? <><CheckCircle2 className="h-3.5 w-3.5" /> Mark as active</>
+                  : <><Circle className="h-3.5 w-3.5" /> Mark as done</>
+                }
+              </Button>
+
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 px-0 text-xs text-destructive hover:text-destructive/80 gap-1"
+                onClick={handleDelete}
+                disabled={isPending}
+              >
+                <X className="h-3 w-3" />
+                Delete
+              </Button>
+            </div>
           </CardContent>
         </div>
       </div>
