@@ -31,14 +31,19 @@ export async function updateSkillNotes(skillId: string, notes: string) {
   })
 }
 
-export async function updateSkillTempo(skillId: string, tempo: number | null) {
-  if (tempo !== null && (tempo < 1 || tempo > 300 || !Number.isInteger(tempo))) {
-    throw new Error("Tempo must be an integer between 1 and 300 BPM")
+export async function createTempoEntry(skillId: string, quarterBpm: number) {
+  if (!Number.isInteger(quarterBpm) || quarterBpm < 1 || quarterBpm > 300) {
+    throw new Error("Quarter-note BPM must be an integer between 1 and 300")
   }
-  await prisma.skill.update({
-    where: { id: skillId },
-    data: { tempo },
+  const entry = await prisma.tempoEntry.create({
+    data: { skillId, quarterBpm },
   })
+  revalidatePath("/")
+  return entry
+}
+
+export async function deleteTempoEntry(entryId: string) {
+  await prisma.tempoEntry.delete({ where: { id: entryId } })
   revalidatePath("/")
 }
 

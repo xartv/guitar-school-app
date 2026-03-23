@@ -22,10 +22,10 @@ type SkillWithDetails = {
   id: string
   title: string
   notes: string | null
-  tempo: number | null
   completed: boolean
   stages: SkillStageModel[]
   links: YoutubeLinkModel[]
+  tempoEntries: { id: string; quarterBpm: number }[]
 }
 
 type Level = { id: string; title: string; skills: SkillWithDetails[] }
@@ -204,6 +204,7 @@ function LevelAccordionItem({ level }: { level: Level }) {
               skill={skill}
               stages={skill.stages}
               links={skill.links}
+              tempoEntries={skill.tempoEntries}
               completed={skill.completed}
             />
           ))}

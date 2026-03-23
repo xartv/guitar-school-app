@@ -878,3 +878,92 @@ Update `src/app/page.tsx`:
 - Render a new section below `<LevelAccordion>` with a heading ("Repertoire") using the same typographic style as the program title block
 - Render `<RepertoireSection items={repertoireItems} programId={program.id} />` inside that section
 - Only show the repertoire section when a program exists
+
+------------------------------------------------------------------------
+
+## Task 62
+
+Remove `tempo Int?` from the `Skill` model and add a new `TempoEntry` model to `prisma/schema.prisma`.
+
+Schema changes:
+
+- Remove the `tempo Int?` field from the `Skill` model.
+- Add the back-relation `tempoEntries TempoEntry[]` to the `Skill` model.
+- Add a new model:
+
+```prisma
+model TempoEntry {
+  id         String  @id @default(cuid())
+  quarterBpm Int
+  skillId    String
+  skill      Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+```
+
+Run the migration with `mcp__prisma-local__migrate-dev` using migration name `add-tempo-entries`.
+
+Technical notes: `onDelete: Cascade` on the `skill` relation ensures `TempoEntry` rows are automatically deleted when their parent `Skill` is deleted — no manual deletion logic needs to be added to `deleteSkill`.
+
+------------------------------------------------------------------------
+
+## Task 63
+
+Replace the `updateSkillTempo` server action with `createTempoEntry` and `deleteTempoEntry` in `src/actions/skill.actions.ts`.
+
+- Remove the `updateSkillTempo` function entirely.
+- Add `createTempoEntry(skillId: string, quarterBpm: number)`:
+  - Validate `quarterBpm` is a positive integer in the range 1–300. Throw a descriptive error if invalid.
+  - Create a `TempoEntry` record via Prisma.
+  - Call `revalidatePath("/")`.
+  - Return the created record.
+- Add `deleteTempoEntry(entryId: string)`:
+  - Delete the `TempoEntry` by id via Prisma.
+  - Call `revalidatePath("/")`.
+
+Technical notes: The 1–300 validation range applies to the quarter-note BPM base value only. Derived column values shown in the UI may exceed 300 — those are computed client-side and never stored.
+
+------------------------------------------------------------------------
+
+## Task 64
+
+Build the `TempoTable` client component at `src/components/TempoTable/TempoTable.tsx` (with `TempoTable.module.css`).
+
+Props:
+
+```ts
+interface TempoTableProps {
+  skillId: string
+  entries: { id: string; quarterBpm: number }[]
+}
+```
+
+Note duration divisions: 1/4→1, 1/8→2, 1/16→4, 1/12→3, 1/24→6.
+
+Behavior:
+
+- Renders a table with 5 columns: 1/4, 1/8, 1/16, 1/12, 1/24.
+- Each existing entry renders as a row. Cell value for column X = `Math.round(entry.quarterBpm * divisions[X])`. Each row has a delete button that calls `deleteTempoEntry(entry.id)` then `router.refresh()`.
+- Below the rows: an "add" input row with one editable cell at a time. The user types a BPM into any column cell. The other 4 cells update instantly (local state only). On confirm (Enter or "+ Add" button), derive `quarterBpm = Math.round(enteredBpm / divisions[enteredCol])`, call `createTempoEntry(skillId, quarterBpm)`, then `router.refresh()`.
+- If no entries and the add row is not open, show a compact "Add tempo" ghost button that reveals the add row.
+- Disable controls and show a spinner during async create/delete operations.
+
+Technical notes: All conversion math is client-side only. Use CSS Modules for table layout. Keep async handlers internal to the component via `useState`.
+
+------------------------------------------------------------------------
+
+## Task 65
+
+Wire `TempoTable` into `SkillCard` and update all data fetching call-sites.
+
+Changes to `src/components/SkillCard.tsx`:
+
+- Remove all tempo-related state variables (`tempo`, `isEditingTempo`, `tempoInput`, `isTempoOpen`, `isTempoLoading`, `tempoError`), all tempo handler functions (`handleSaveTempo`, `handleClearTempo`, `handleCancelTempo`), the `tempoBadge` in the collapsed header, and the entire tempo JSX section in the card body.
+- Remove the `updateSkillTempo` import.
+- Update `SkillCardProps`: remove `tempo: number | null` from the `skill` shape; add `tempoEntries: { id: string; quarterBpm: number }[]` as a top-level prop.
+- In the card body (expanded section), replace the removed tempo block with `<TempoTable skillId={skill.id} entries={tempoEntries} />`. Position it after the notes section.
+- In the collapsed header: if `tempoEntries.length > 0`, show a compact summary badge (e.g. `♩ N` or `N tempos`) in place of the old `tempoBadge`. If empty, show nothing.
+
+Update Prisma query call-sites that fetch skills to include `tempoEntries: true` in the `include` block. Check `src/app/page.tsx` and `src/features/levels/LevelAccordion.tsx` (or wherever skills are queried).
+
+After this task, run `npm run build` to confirm no TypeScript errors remain.
+

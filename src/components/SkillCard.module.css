@@ -87,30 +87,3 @@
   white-space: nowrap;
 }
 
-.tempoRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tempoEditRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tempoInput {
-  width: 80px;
-  font-size: 0.75rem;
-  background: var(--input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px 8px;
-  color: var(--foreground);
-  outline: none;
-}
-
-.tempoInput:focus {
-  outline: 2px solid var(--ring);
-  outline-offset: -2px;
-}

@@ -13,6 +13,7 @@ export async function getLevels(programId: string) {
         include: {
           stages: { orderBy: { stage: "asc" } },
           links: true,
+          tempoEntries: { orderBy: { createdAt: "asc" } },
         },
       },
     },
@@ -31,6 +32,7 @@ export async function deleteLevel(levelId: string) {
 
     await tx.skillStage.deleteMany({ where: { skillId: { in: skillIds } } })
     await tx.youtubeLink.deleteMany({ where: { skillId: { in: skillIds } } })
+    await tx.tempoEntry.deleteMany({ where: { skillId: { in: skillIds } } })
     await tx.skill.deleteMany({ where: { levelId } })
     await tx.level.delete({ where: { id: levelId } })
   })

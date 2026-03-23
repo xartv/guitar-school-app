@@ -1,0 +1,87 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 28px;
+  width: 100%;
+}
+
+.headerCell {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding: 0 4px 6px 4px;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.headerSpacer {
+  /* empty cell above delete column */
+}
+
+.row {
+  display: contents;
+}
+
+.cell {
+  font-size: 0.75rem;
+  color: var(--foreground);
+  padding: 4px 4px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.deleteCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteBtn {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+/* Reveal delete on row hover — targets sibling cells via parent trick */
+.row:hover .deleteBtn {
+  opacity: 1;
+}
+
+.addInput {
+  font-size: 0.75rem;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 2px;
+  text-align: center;
+  color: var(--foreground);
+  width: 100%;
+  outline: none;
+  /* remove number input spinners */
+  -moz-appearance: textfield;
+}
+
+.addInput::-webkit-outer-spin-button,
+.addInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.addInput:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.addInput.activeInput {
+  border-color: var(--ring);
+}
+
+.computedCell {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  padding: 4px 4px;
+  text-align: center;
+}
+
+.addRowAction {
+  grid-column: 1 / -1;
+  padding-top: 6px;
+}

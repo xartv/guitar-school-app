@@ -5,19 +5,21 @@ import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import ReactMarkdown from "react-markdown"
-import { deleteSkill, updateSkillNotes, addYoutubeLink, updateSkillTempo, deleteYoutubeLink } from "@/actions/skill.actions"
+import { deleteSkill, updateSkillNotes, addYoutubeLink, deleteYoutubeLink } from "@/actions/skill.actions"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { SkillProgress } from "@/components/SkillProgress/SkillProgress"
 import { X, Pencil, Loader2, ChevronDown } from "lucide-react"
 import { YoutubeEmbedList } from "@/components/YoutubeEmbed/YoutubeEmbed"
+import { TempoTable } from "@/components/TempoTable/TempoTable"
 import styles from "./SkillCard.module.css"
 
 interface SkillCardProps {
-  skill: { id: string; title: string; notes: string | null; tempo: number | null }
+  skill: { id: string; title: string; notes: string | null }
   stages: SkillStageModel[]
   links: YoutubeLinkModel[]
+  tempoEntries: { id: string; quarterBpm: number }[]
   completed?: boolean
 }
 
@@ -40,19 +42,12 @@ function SkillProgressPips({ stages, completed }: { stages: SkillStageModel[]; c
   )
 }
 
-export function SkillCard({ skill, stages, links, completed = false }: SkillCardProps) {
+export function SkillCard({ skill, stages, links, tempoEntries, completed = false }: SkillCardProps) {
   const [isPending, setIsPending] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [notesValue, setNotesValue] = useState(skill.notes ?? "")
   const [linkValue, setLinkValue] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-
-  const [tempo, setTempo] = useState<number | null>(skill.tempo)
-  const [isEditingTempo, setIsEditingTempo] = useState(false)
-  const [tempoInput, setTempoInput] = useState(skill.tempo?.toString() ?? "")
-  const [isTempoOpen, setIsTempoOpen] = useState(false)
-  const [isTempoLoading, setIsTempoLoading] = useState(false)
-  const [tempoError, setTempoError] = useState("")
 
   const router = useRouter()
 
@@ -102,50 +97,6 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
     setIsEditing(false)
   }
 
-  async function handleSaveTempo() {
-    const parsed = parseInt(tempoInput, 10)
-    if (isNaN(parsed) || parsed < 1 || parsed > 300) {
-      setTempoError("Enter a value between 1 and 300")
-      return
-    }
-    setTempoError("")
-    setIsTempoLoading(true)
-    try {
-      await updateSkillTempo(skill.id, parsed)
-      setTempo(parsed)
-      setIsEditingTempo(false)
-      setIsTempoOpen(false)
-      router.refresh()
-    } catch (error) {
-      console.error("Failed to update tempo:", error)
-    } finally {
-      setIsTempoLoading(false)
-    }
-  }
-
-  async function handleClearTempo() {
-    setIsTempoLoading(true)
-    try {
-      await updateSkillTempo(skill.id, null)
-      setTempo(null)
-      setTempoInput("")
-      setIsEditingTempo(false)
-      setIsTempoOpen(false)
-      router.refresh()
-    } catch (error) {
-      console.error("Failed to clear tempo:", error)
-    } finally {
-      setIsTempoLoading(false)
-    }
-  }
-
-  function handleCancelTempo() {
-    setTempoInput(tempo?.toString() ?? "")
-    setTempoError("")
-    setIsEditingTempo(false)
-    if (tempo === null) setIsTempoOpen(false)
-  }
-
   return (
     <Card
       className={cn(
@@ -155,19 +106,19 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
     >
       {/* Header row — always visible */}
       <div className={styles.headerRow}>
-        {/* Toggle trigger (title + tempo badge + pips) */}
+        {/* Toggle trigger (title + pips) */}
         <button className={styles.trigger} onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen}>
           <span className={styles.title}>{skill.title}</span>
 
-          {/* Tempo badge — visible in header when tempo is set */}
-          {tempo != null && (
-            <span className={styles.tempoBadge}>{tempo} BPM</span>
+          {/* Tempo count badge when entries exist */}
+          {tempoEntries.length > 0 && (
+            <span className={styles.tempoBadge}>♩ {tempoEntries.length}</span>
           )}
 
           <SkillProgressPips stages={stages} completed={completed} />
         </button>
 
-        {/* Delete button — sibling of trigger, not nested inside it */}
+        {/* Delete button — sibling of trigger */}
         <Button
           variant="ghost"
           size="icon"
@@ -290,85 +241,8 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
 
             <div className="h-px bg-border" />
 
-            {/* Tempo section */}
-            {(tempo != null ? isEditingTempo : isTempoOpen) ? (
-              /* Edit / add tempo input */
-              <div className="flex flex-col gap-1">
-                <div className={styles.tempoEditRow}>
-                  <input
-                    type="number"
-                    min={1}
-                    max={300}
-                    aria-label="Tempo in BPM"
-                    className={styles.tempoInput}
-                    value={tempoInput}
-                    placeholder="BPM"
-                    onChange={(e) => { setTempoInput(e.target.value); setTempoError("") }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveTempo()
-                      if (e.key === "Escape") handleCancelTempo()
-                    }}
-                    autoFocus
-                    disabled={isTempoLoading}
-                  />
-                  <Button
-                    size="sm"
-                    className="h-7 px-3 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={handleSaveTempo}
-                    disabled={isTempoLoading}
-                  >
-                    {isTempoLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-3 text-xs"
-                    onClick={handleCancelTempo}
-                    disabled={isTempoLoading}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-                {tempoError && (
-                  <span className="text-xs text-destructive">{tempoError}</span>
-                )}
-              </div>
-            ) : tempo != null ? (
-              /* Tempo is set — display mode */
-              <div className={styles.tempoRow}>
-                <span className="text-sm font-medium text-foreground">{tempo} BPM</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
-                  onClick={() => { setTempoInput(tempo?.toString() ?? ""); setIsEditingTempo(true) }}
-                  disabled={isTempoLoading}
-                >
-                  <Pencil className="h-3 w-3" />
-                  Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                  onClick={handleClearTempo}
-                  disabled={isTempoLoading}
-                >
-                  {isTempoLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Clear"}
-                </Button>
-              </div>
-            ) : (
-              /* Tempo is not set — show toggle button */
-              <Button
-                size="sm"
-                variant="ghost"
-                className="self-start h-6 px-0 text-xs text-muted-foreground hover:text-foreground gap-1"
-                onClick={() => setIsTempoOpen(true)}
-              >
-                <Pencil className="h-3 w-3" />
-                Add tempo
-              </Button>
-            )}
+            {/* Tempo table */}
+            <TempoTable skillId={skill.id} entries={tempoEntries} />
           </CardContent>
         </div>
       </div>
