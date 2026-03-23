@@ -44,16 +44,24 @@ model Level {
 }
 
 model Skill {
-  id        String       @id @default(cuid())
-  title     String
-  notes     String?
-  tempo     Int?
-  completed Boolean      @default(false)
-  levelId   String
-  createdAt DateTime     @default(now())
-  level     Level        @relation(fields: [levelId], references: [id])
-  stages    SkillStage[]
-  links     YoutubeLink[]
+  id           String        @id @default(cuid())
+  title        String
+  notes        String?
+  completed    Boolean       @default(false)
+  levelId      String
+  createdAt    DateTime      @default(now())
+  level        Level         @relation(fields: [levelId], references: [id])
+  stages       SkillStage[]
+  links        YoutubeLink[]
+  tempoEntries TempoEntry[]
+}
+
+model TempoEntry {
+  id         String   @id @default(cuid())
+  quarterBpm Int
+  skillId    String
+  createdAt  DateTime @default(now())
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
 }
 
 model SkillStage {
