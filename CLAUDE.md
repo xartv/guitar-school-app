@@ -76,6 +76,28 @@ After completing a task:
 
 The main agent must follow this pipeline for every task:
 
+## Step 0 — Pre-implementation: System Analysis (conditional)
+
+If the request is a **new feature** or involves changes that touch multiple system layers (schema, actions, UI) or require decomposition into subtasks:
+
+→ Launch **`system-analyst`** agent BEFORE writing any code.
+
+The system-analyst will:
+- Analyze integration points with the existing system
+- Decompose the feature into ordered subtasks
+- Append new tasks to `docs/tasks.md`
+
+Wait for its result, then proceed with implementation of the first task it defines.
+
+**When to trigger system-analyst:**
+- New feature requests that are not yet in `docs/tasks.md`
+- Requests that touch schema + actions + UI together
+- Anything that needs to be broken into multiple tasks
+
+**Skip this step when:**
+- The task already exists in `docs/tasks.md`
+- The change is a small isolated fix or tweak to a single component
+
 ## Step 1 — Pre-implementation: UI Design (conditional)
 
 If the task involves creating or redesigning a UI component or visual layout:
@@ -120,6 +142,8 @@ Example: `Create Prisma client helper (Task 5)`
 ## Pipeline Summary
 
 ```
+[system-analyst]        ← for new features / multi-layer changes
+        ↓
 [ui-design-advisor]     ← only for UI tasks
         ↓
   implementation
@@ -181,6 +205,16 @@ All database operations must go through:
 Server Actions → Prisma → Database
 
 Do not access the database directly from client components.
+
+## QA Database Safety Rules
+
+During QA testing, agents must NOT delete or modify existing data in the database.
+
+Rules for QA agents:
+- To test create/edit/delete functionality — create **new test entities** (levels, skills, etc.) specifically for the test.
+- After testing is complete — **delete only the test entities** that were created during the session.
+- Leave all pre-existing data untouched and in the same state as before QA started.
+- If a test requires deleting an entity, create a new one first, then delete that new one — never delete existing user data.
 
 ---
 

@@ -768,3 +768,113 @@ Reference candidates from `docs/spec.md` section "Future Improvements":
 -   Progress dashboard
 -   Statistics
 -   Mobile optimization
+
+------------------------------------------------------------------------
+
+## Task 58 ✅
+
+Add `RepertoireItem` and `RepertoireLink` models to the Prisma schema.
+
+Add two new models to `prisma/schema.prisma`:
+
+```prisma
+model RepertoireItem {
+  id        String           @id @default(cuid())
+  title     String
+  notes     String?
+  completed Boolean          @default(false)
+  programId String
+  createdAt DateTime         @default(now())
+  program   Program          @relation(fields: [programId], references: [id])
+  links     RepertoireLink[]
+}
+
+model RepertoireLink {
+  id               String         @id @default(cuid())
+  url              String
+  repertoireItemId String
+  item             RepertoireItem @relation(fields: [repertoireItemId], references: [id])
+}
+```
+
+Also add the back-relation `repertoireItems RepertoireItem[]` to the existing `Program` model.
+
+Run the migration with `mcp__prisma-local__migrate-dev` using migration name `add-repertoire`.
+
+------------------------------------------------------------------------
+
+## Task 59 ✅
+
+Create `src/actions/repertoire.actions.ts` with core CRUD server actions.
+
+Add `"use server"` directive. Implement the following actions:
+
+- `getRepertoireItems(programId: string)` — fetch all `RepertoireItem` records for the program ordered by `createdAt asc`, including their `links`
+- `createRepertoireItem(programId: string, title: string)` — create a new item (trim + validate non-empty title); call `revalidatePath("/")`
+- `deleteRepertoireItem(itemId: string)` — delete linked `RepertoireLink` records first (or use `prisma.$transaction`), then the item; call `revalidatePath("/")`
+- `toggleRepertoireItemCompleted(itemId: string, completed: boolean)` — update `completed` field; call `revalidatePath("/")`
+- `updateRepertoireItemNotes(itemId: string, notes: string)` — update `notes`; call `revalidatePath("/")`
+- `addRepertoireLink(itemId: string, url: string)` — create a new `RepertoireLink`; call `revalidatePath("/")`
+
+Follow the same patterns as `src/actions/skill.actions.ts`.
+
+------------------------------------------------------------------------
+
+## Task 60 ✅
+
+Build the `RepertoireCard` client component at `src/components/RepertoireCard.tsx`.
+
+Props:
+
+```ts
+interface RepertoireCardProps {
+  item: { id: string; title: string; notes: string | null; completed: boolean }
+  links: { id: string; url: string }[]
+}
+```
+
+Behavior:
+
+- Collapsible card using `useState` + CSS height transition (same pattern as `SkillCard`) — collapsed by default
+- Collapsed header shows: completion checkbox (left of title), title, chevron (far right)
+- Checking the checkbox calls `toggleRepertoireItemCompleted` with optimistic local state
+- Completed items get the same green ring visual as `SkillCard` (`ring-completed border-transparent`)
+- Expanded body shows:
+  - YouTube links list + "Paste YouTube URL..." add input (same pattern as `SkillCard`)
+  - Notes markdown display (`ReactMarkdown`) + "Edit notes" / "Add notes" ghost button
+  - Delete button (calls `deleteRepertoireItem` then `router.refresh()`)
+- Notes editing calls `updateRepertoireItemNotes` then `router.refresh()`
+- Add link calls `addRepertoireLink` then `router.refresh()`
+
+Use existing `Button`, `Card`, `CardContent` shadcn/ui components. No new shadcn components needed. Style consistently with `SkillCard` visual language using CSS Modules or inline Tailwind classes.
+
+------------------------------------------------------------------------
+
+## Task 61 ✅
+
+Build `RepertoireSection` feature component and wire it into `src/app/page.tsx`.
+
+Create `src/features/repertoire/RepertoireSection.tsx` as a client component.
+
+Props:
+
+```ts
+interface RepertoireSectionProps {
+  items: { id: string; title: string; notes: string | null; completed: boolean; links: { id: string; url: string }[] }[]
+  programId: string
+}
+```
+
+Behavior:
+
+- Displays an "Add Song" button; clicking reveals an inline text input + confirm button
+- Submitting calls `createRepertoireItem(programId, title)`; on success clears input and calls `router.refresh()`
+- Renders a list of `RepertoireCard` components for each item
+- If no items exist, shows an empty-state message styled consistently with the existing levels empty state
+
+Update `src/app/page.tsx`:
+
+- Call `getRepertoireItems(program.id)` alongside `getLevels` (both at the top of the Server Component)
+- Render a new section below `<LevelAccordion>` with a heading ("Repertoire") using the same typographic style as the program title block
+- Render `<RepertoireSection items={repertoireItems} programId={program.id} />` inside that section
+- Only show the repertoire section when a program exists
