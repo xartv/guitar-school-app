@@ -76,16 +76,16 @@ export function YoutubeEmbed({ url, onDelete }: YoutubeEmbedProps) {
               </svg>
             </div>
           </div>
-          {onDelete && (
-            <button
-              className={styles.deleteBtn}
-              onClick={(e) => { e.stopPropagation(); onDelete() }}
-              aria-label="Remove video"
-            >
-              <Trash2 size={14} />
-            </button>
-          )}
         </>
+      )}
+      {onDelete && (
+        <button
+          className={styles.deleteBtn}
+          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          aria-label="Remove video"
+        >
+          <Trash2 size={14} />
+        </button>
       )}
     </div>
   )
