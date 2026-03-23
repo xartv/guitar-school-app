@@ -20,9 +20,9 @@ const DIVISIONS: Record<Col, number> = {
 }
 
 function computeAll(bpm: number, fromCol: Col): Record<Col, number> {
-  const quarterBpm = bpm / DIVISIONS[fromCol]
+  const quarterBpm = bpm * DIVISIONS[fromCol]
   return Object.fromEntries(
-    COLS.map((col) => [col, Math.round(quarterBpm * DIVISIONS[col])])
+    COLS.map((col) => [col, Math.round(quarterBpm / DIVISIONS[col])])
   ) as Record<Col, number>
 }
 
@@ -68,7 +68,7 @@ export function TempoTable({ skillId, entries }: TempoTableProps) {
     const rawVal = inputValues[activeCol]
     const num = parseInt(rawVal, 10)
     if (!rawVal || isNaN(num) || num < 1) return
-    const quarterBpm = Math.round(num / DIVISIONS[activeCol])
+    const quarterBpm = Math.round(num * DIVISIONS[activeCol])
     if (quarterBpm < 1 || quarterBpm > 300) return
     setIsPending(true)
     try {
