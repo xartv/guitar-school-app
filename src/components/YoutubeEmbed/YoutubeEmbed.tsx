@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { Trash2 } from "lucide-react"
 import styles from "./YoutubeEmbed.module.css"
 
 interface YoutubeEmbedProps {
   url: string
+  onDelete?: () => void
 }
 
 function extractVideoId(url: string): string | null {
@@ -24,7 +26,7 @@ function extractVideoId(url: string): string | null {
   return null
 }
 
-export function YoutubeEmbed({ url }: YoutubeEmbedProps) {
+export function YoutubeEmbed({ url, onDelete }: YoutubeEmbedProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const videoId = extractVideoId(url)
 
@@ -74,6 +76,15 @@ export function YoutubeEmbed({ url }: YoutubeEmbedProps) {
               </svg>
             </div>
           </div>
+          {onDelete && (
+            <button
+              className={styles.deleteBtn}
+              onClick={(e) => { e.stopPropagation(); onDelete() }}
+              aria-label="Remove video"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
         </>
       )}
     </div>
@@ -82,14 +93,19 @@ export function YoutubeEmbed({ url }: YoutubeEmbedProps) {
 
 interface YoutubeEmbedListProps {
   links: { id: string; url: string }[]
+  onDelete?: (id: string) => void
 }
 
-export function YoutubeEmbedList({ links }: YoutubeEmbedListProps) {
+export function YoutubeEmbedList({ links, onDelete }: YoutubeEmbedListProps) {
   if (links.length === 0) return null
   return (
     <div className={styles.videoList}>
       {links.map((link) => (
-        <YoutubeEmbed key={link.id} url={link.url} />
+        <YoutubeEmbed
+          key={link.id}
+          url={link.url}
+          onDelete={onDelete ? () => onDelete(link.id) : undefined}
+        />
       ))}
     </div>
   )

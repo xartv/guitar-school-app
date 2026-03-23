@@ -75,6 +75,11 @@ export async function addYoutubeLink(skillId: string, url: string) {
   })
 }
 
+export async function deleteYoutubeLink(linkId: string) {
+  await prisma.youtubeLink.delete({ where: { id: linkId } })
+  revalidatePath("/")
+}
+
 export async function checkSkillCompletion(skillId: string): Promise<boolean> {
   const stages = await prisma.skillStage.findMany({
     where: { skillId },

@@ -8,6 +8,7 @@ import {
   toggleRepertoireItemCompleted,
   updateRepertoireItemNotes,
   addRepertoireLink,
+  deleteRepertoireLink,
 } from "@/actions/repertoire.actions"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -146,7 +147,10 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
           <CardContent className="px-4 pb-4 pt-3 flex flex-col gap-3">
             {/* Video links */}
             <div className="flex flex-col gap-1.5">
-              <YoutubeEmbedList links={links} />
+              <YoutubeEmbedList
+                links={links}
+                onDelete={async (id) => { await deleteRepertoireLink(id); router.refresh() }}
+              />
 
               {/* Add link */}
               <div className="flex gap-1.5">

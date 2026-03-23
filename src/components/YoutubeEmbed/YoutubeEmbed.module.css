@@ -1,7 +1,17 @@
 .videoList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+}
+
+/* 1 video: full width */
+.videoList:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* last video spans full width when total count is odd (and > 1) */
+.videoList > :last-child:nth-child(odd):not(:only-child) {
+  grid-column: 1 / -1;
 }
 
 .embedWrapper {
@@ -43,6 +53,34 @@
 }
 
 .embedWrapper:hover .playCircle {
+  background: rgba(200, 0, 0, 0.85);
+}
+
+.deleteBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  padding: 5px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embedWrapper:hover .deleteBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.deleteBtn:hover {
   background: rgba(200, 0, 0, 0.85);
 }
 

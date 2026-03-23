@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import ReactMarkdown from "react-markdown"
-import { deleteSkill, updateSkillNotes, addYoutubeLink, updateSkillTempo } from "@/actions/skill.actions"
+import { deleteSkill, updateSkillNotes, addYoutubeLink, updateSkillTempo, deleteYoutubeLink } from "@/actions/skill.actions"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -149,13 +149,13 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
   return (
     <Card
       className={cn(
-        "group/card card-hover border border-border bg-card shadow-sm rounded-xl overflow-hidden",
+        "group/card card-hover border border-border bg-card shadow-sm rounded-xl overflow-hidden gap-0",
         completed && "ring-completed border-transparent"
       )}
     >
       {/* Header row — always visible */}
       <div className={styles.headerRow}>
-        {/* Toggle trigger (title + tempo badge + pips + chevron) */}
+        {/* Toggle trigger (title + tempo badge + pips) */}
         <button className={styles.trigger} onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen}>
           <span className={styles.title}>{skill.title}</span>
 
@@ -165,12 +165,6 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
           )}
 
           <SkillProgressPips stages={stages} completed={completed} />
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
-              isOpen && "rotate-180"
-            )}
-          />
         </button>
 
         {/* Delete button — sibling of trigger, not nested inside it */}
@@ -188,6 +182,21 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
             <X className="h-3.5 w-3.5" />
           )}
         </Button>
+
+        {/* Chevron — far right, outside trigger */}
+        <button
+          className="p-2 shrink-0 text-muted-foreground focus:outline-none"
+          onClick={() => setIsOpen((o) => !o)}
+          tabIndex={-1}
+          aria-hidden
+        >
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              isOpen && "rotate-180"
+            )}
+          />
+        </button>
       </div>
 
       {/* Collapsible body */}
@@ -201,7 +210,10 @@ export function SkillCard({ skill, stages, links, completed = false }: SkillCard
 
             {/* Video links */}
             <div className="flex flex-col gap-1.5">
-              <YoutubeEmbedList links={links} />
+              <YoutubeEmbedList
+                links={links}
+                onDelete={async (id) => { await deleteYoutubeLink(id); router.refresh() }}
+              />
 
               {/* Add link */}
               <div className="flex gap-1.5">

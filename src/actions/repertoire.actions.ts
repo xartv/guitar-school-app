@@ -56,3 +56,8 @@ export async function addRepertoireLink(itemId: string, url: string) {
 
   revalidatePath("/")
 }
+
+export async function deleteRepertoireLink(linkId: string) {
+  await prisma.repertoireLink.delete({ where: { id: linkId } })
+  revalidatePath("/")
+}
