@@ -8,10 +8,29 @@ datasource db {
 }
 
 model Program {
-  id        String   @id @default(cuid())
+  id               String           @id @default(cuid())
+  title            String
+  createdAt        DateTime         @default(now())
+  levels           Level[]
+  repertoireItems  RepertoireItem[]
+}
+
+model RepertoireItem {
+  id        String           @id @default(cuid())
   title     String
-  createdAt DateTime @default(now())
-  levels    Level[]
+  notes     String?
+  completed Boolean          @default(false)
+  programId String
+  createdAt DateTime         @default(now())
+  program   Program          @relation(fields: [programId], references: [id])
+  links     RepertoireLink[]
+}
+
+model RepertoireLink {
+  id               String         @id @default(cuid())
+  url              String
+  repertoireItemId String
+  item             RepertoireItem @relation(fields: [repertoireItemId], references: [id])
 }
 
 model Level {
