@@ -110,11 +110,6 @@ export function SkillCard({ skill, stages, links, tempoEntries, completed = fals
         <button className={styles.trigger} onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen}>
           <span className={styles.title}>{skill.title}</span>
 
-          {/* Tempo count badge when entries exist */}
-          {tempoEntries.length > 0 && (
-            <span className={styles.tempoBadge}>♩ {tempoEntries.length}</span>
-          )}
-
           <SkillProgressPips stages={stages} completed={completed} />
         </button>
 

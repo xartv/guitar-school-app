@@ -76,14 +76,4 @@
   overflow: visible;
 }
 
-.tempoBadge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--muted);
-  color: var(--muted-foreground);
-  border: 1px solid var(--border);
-  white-space: nowrap;
-}
 
