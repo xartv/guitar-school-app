@@ -32,8 +32,8 @@ export async function updateSkillNotes(skillId: string, notes: string) {
 }
 
 export async function createTempoEntry(skillId: string, quarterBpm: number) {
-  if (!Number.isInteger(quarterBpm) || quarterBpm < 1 || quarterBpm > 300) {
-    throw new Error("Quarter-note BPM must be an integer between 1 and 300")
+  if (!Number.isInteger(quarterBpm) || quarterBpm < 1) {
+    throw new Error("Quarter-note BPM must be a positive integer")
   }
   const entry = await prisma.tempoEntry.create({
     data: { skillId, quarterBpm },
