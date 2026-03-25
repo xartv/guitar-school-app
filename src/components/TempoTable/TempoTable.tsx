@@ -69,7 +69,7 @@ export function TempoTable({ skillId, entries }: TempoTableProps) {
     const num = parseInt(rawVal, 10)
     if (!rawVal || isNaN(num) || num < 1) return
     const quarterBpm = Math.round(num * DIVISIONS[activeCol])
-    if (quarterBpm < 1 || quarterBpm > 300) return
+    if (quarterBpm < 1) return
     setIsPending(true)
     try {
       await createTempoEntry(skillId, quarterBpm)
