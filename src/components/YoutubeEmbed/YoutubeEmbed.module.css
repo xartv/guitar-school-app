@@ -84,6 +84,41 @@
   background: rgba(200, 0, 0, 0.85);
 }
 
+.invalidLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  min-width: 0;
+}
+
+.invalidLink:hover .invalidLinkDeleteBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.invalidLinkDeleteBtn {
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  background: transparent;
+  border-radius: 4px;
+  padding: 2px;
+  color: var(--muted-foreground);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invalidLinkDeleteBtn:hover {
+  color: var(--destructive);
+}
+
 .iframe {
   position: absolute;
   inset: 0;
