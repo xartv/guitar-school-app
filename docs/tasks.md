@@ -967,3 +967,272 @@ Update Prisma query call-sites that fetch skills to include `tempoEntries: true`
 
 After this task, run `npm run build` to confirm no TypeScript errors remain.
 
+------------------------------------------------------------------------
+
+# Phase: Authentication
+
+## Task 66 ✅
+
+Add the `User` model to `prisma/schema.prisma` and link `Program` to `User` (1:1).
+
+Schema changes:
+
+- Add a new model:
+
+```prisma
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  program      Program?
+}
+```
+
+- Add `userId String @unique` and `user User @relation(fields: [userId], references: [id])` to the `Program` model.
+
+Run the migration with `mcp__prisma-local__migrate-dev` using migration name `add-user-auth`.
+
+Technical notes:
+
+- `Program.userId` is `@unique` to enforce the 1:1 relationship — each user has at most one program.
+- `passwordHash` stores a bcrypt hash; the plain-text password is never stored.
+- The existing single `Program` row in the database has no `userId` yet. The migration must handle this: either mark `userId` as optional (`String?`) for the migration and tighten it later, or reset the development database first (`mcp__prisma-local__migrate-reset` after confirming with the user). Discuss with the user before choosing.
+
+------------------------------------------------------------------------
+
+## Task 67 ✅
+
+Install authentication dependencies.
+
+Install the following packages:
+
+```
+npm install next-auth@beta bcryptjs
+npm install --save-dev @types/bcryptjs
+```
+
+**Library choice rationale — NextAuth.js v5 (Auth.js beta):**
+
+- Designed specifically for Next.js App Router: ships a first-class `auth()` helper that works directly in Server Components and Server Actions, eliminating the need for manual JWT parsing.
+- Handles session cookies, CSRF protection, and redirect flows out of the box — no custom middleware logic needed.
+- The `CredentialsProvider` supports email/password auth without OAuth.
+- JWT sessions (stateless, stored in a signed httpOnly cookie) are used — no additional database session table is required.
+- Alternative considered: `jose` (raw JWT). It is lighter but requires manually implementing cookie management, CSRF, and redirect flows — significant boilerplate that NextAuth handles automatically. Not worth the trade-off here.
+
+After installing, verify `npm run build` still succeeds (the lib has no configuration yet, so no errors expected at this step).
+
+------------------------------------------------------------------------
+
+## Task 68 ✅
+
+Create the NextAuth configuration at `src/auth.ts`.
+
+This file is the single source of truth for the auth instance.
+
+```ts
+// src/auth.ts
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { prisma } from "@/lib/prisma"
+import bcrypt from "bcryptjs"
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  providers: [
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // validate, find user, compare hash — return user object or null
+      },
+    }),
+  ],
+  session: { strategy: "jwt" },
+  pages: {
+    signIn: "/login",
+  },
+  callbacks: {
+    jwt({ token, user }) {
+      if (user) token.id = user.id
+      return token
+    },
+    session({ session, token }) {
+      session.user.id = token.id as string
+      return session
+    },
+  },
+})
+```
+
+Add the route handler at `src/app/api/auth/[...nextauth]/route.ts`:
+
+```ts
+import { handlers } from "@/auth"
+export const { GET, POST } = handlers
+```
+
+Technical notes:
+
+- The `authorize` callback must fetch the user by email, compare the submitted password against `passwordHash` using `bcrypt.compare`, and return `{ id, email }` on success or `null` on failure.
+- The `jwt` and `session` callbacks inject `user.id` into the session so Server Actions can read it via `auth()`.
+- Add a `next-auth.d.ts` type augmentation file to extend `Session` and `JWT` with the `id` field.
+- Note: this is the only place in the project where an API route (`/api/auth/[...nextauth]`) is used — it is required by NextAuth's internal redirect/callback mechanism and is not a custom data API route.
+
+------------------------------------------------------------------------
+
+## Task 69 ✅
+
+Create Server Actions for registration and login in `src/actions/auth.actions.ts`.
+
+```ts
+"use server"
+
+export async function registerUser(email: string, password: string): Promise<void>
+export async function loginUser(email: string, password: string): Promise<void>
+export async function logoutUser(): Promise<void>
+```
+
+Behavior:
+
+- `registerUser`:
+  - Validate email format and non-empty password (min 6 characters).
+  - Check that no `User` with this email already exists; throw a descriptive error if so.
+  - Hash the password with `bcrypt.hash(password, 12)`.
+  - Create the `User` record in Prisma (no `Program` created here — the user creates their own program after login, as today).
+  - Call `signIn("credentials", { email, password, redirectTo: "/" })` from `src/auth.ts` to log the user in immediately after registration.
+- `loginUser`:
+  - Call `signIn("credentials", { email, password, redirectTo: "/" })`.
+  - NextAuth's `authorize` callback handles validation internally; if credentials are wrong, `signIn` throws a `CredentialsSignin` error — catch it and re-throw with a user-friendly message.
+- `logoutUser`:
+  - Call `signOut({ redirectTo: "/login" })` from `src/auth.ts`.
+
+Technical notes:
+
+- All three functions are Server Actions (`"use server"` at top of file).
+- `signIn` and `signOut` from NextAuth v5 can be called directly from Server Actions — no client redirect needed.
+- Do NOT use `revalidatePath` here; the redirectTo in signIn/signOut handles navigation.
+
+------------------------------------------------------------------------
+
+## Task 70 ✅
+
+Build the `/login` page at `src/app/login/page.tsx`.
+
+This is a Server Component page that renders a `LoginForm` client component.
+
+`LoginForm` behavior:
+
+- Fields: Email (type="email"), Password (type="password")
+- Submit button: "Sign in"
+- On submit, calls the `loginUser` Server Action.
+- Displays an inline error message if the action throws (e.g. "Invalid email or password").
+- Shows a loading/disabled state while the action is pending (use `useActionState` or `useTransition`).
+- Below the form: "Don't have an account? Register" link pointing to `/register`.
+
+Visual style:
+
+- Centered card layout (max-w-sm, centered with flex min-h-screen).
+- Use `Card`, `CardHeader`, `CardContent` from shadcn/ui.
+- Heading: "Sign in to Guitar Practice Program".
+- Consistent with the existing app visual language (same font, colors, border-radius).
+
+Technical notes:
+
+- The page at `/login` must NOT be protected by the auth middleware — it must be publicly accessible.
+- No redirect from this page if already logged in (keep it simple for now).
+
+------------------------------------------------------------------------
+
+## Task 71 ✅
+
+Build the `/register` page at `src/app/register/page.tsx`.
+
+This is a Server Component page that renders a `RegisterForm` client component.
+
+`RegisterForm` behavior:
+
+- Fields: Email (type="email"), Password (type="password"), Confirm Password (type="password")
+- Submit button: "Create account"
+- Client-side validation: passwords must match before submitting; show an inline error if not.
+- On submit, calls the `registerUser` Server Action.
+- Displays an inline error message if the action throws (e.g. "Email already registered").
+- Shows a loading/disabled state while the action is pending.
+- Below the form: "Already have an account? Sign in" link pointing to `/login`.
+
+Visual style:
+
+- Same centered card layout as `/login`.
+- Heading: "Create your account".
+
+------------------------------------------------------------------------
+
+## Task 72 ✅
+
+Protect the main page (`/`) with an auth guard.
+
+Create `src/middleware.ts` using NextAuth's built-in middleware:
+
+```ts
+export { auth as middleware } from "@/auth"
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|register).*)"],
+}
+```
+
+Behavior:
+
+- Any unauthenticated request to `/` (or any future protected route) is automatically redirected to `/login`.
+- The `/login` and `/register` routes remain publicly accessible.
+- API routes (including `/api/auth/...`) are excluded from the matcher.
+
+Technical notes:
+
+- This is the minimal middleware approach recommended by NextAuth v5 — no custom logic needed.
+- Verify that after implementing this task, opening `http://localhost:3000` while unauthenticated redirects to `/login`.
+
+------------------------------------------------------------------------
+
+## Task 73 ✅
+
+Isolate all data by `userId` — update `getProgram` and `createProgram` server actions to scope to the authenticated user.
+
+Changes to `src/actions/program.actions.ts`:
+
+- In `getProgram`: call `auth()` from `src/auth.ts` to get the current session. Extract `session.user.id`. Query `prisma.program.findFirst({ where: { userId: session.user.id }, include: { levels: true } })`. If no session exists, return `null`.
+- In `createProgram`: call `auth()` to get the session; throw if unauthenticated. Pass `userId: session.user.id` in the `prisma.program.create` data object.
+
+No changes are needed to any other actions (`level.actions.ts`, `skill.actions.ts`, `repertoire.actions.ts`) because they all operate on IDs derived from the already-scoped `Program` or `Level` — the data isolation chain is: `User → Program → Level → Skill`. A user who does not own a `programId` cannot obtain it from `getProgram`, so lower-level actions are implicitly isolated.
+
+Technical notes:
+
+- `auth()` in a Server Action returns the session or `null`.
+- After this change, the existing `Program` row in the database has no `userId` — it will no longer appear for any logged-in user (which is fine for a fresh development database).
+
+------------------------------------------------------------------------
+
+## Task 74 ✅
+
+Add a user header bar to the main page — display the current user's email and a "Sign out" button.
+
+Changes to `src/app/page.tsx`:
+
+- Call `auth()` from `src/auth.ts` at the top of the Server Component to get the session.
+- In the sticky header, add a right-aligned section showing:
+  - The user's email in a small muted text (`text-sm text-muted-foreground`).
+  - A "Sign out" ghost button that calls `logoutUser` from `src/actions/auth.actions.ts` via a `<form action={logoutUser}>` or a small `SignOutButton` client component.
+
+`SignOutButton` (if client component needed):
+
+- A `<Button variant="ghost" size="sm">` that on click calls `logoutUser()` via a transition.
+- Can be a small inline client component in `src/features/auth/SignOutButton.tsx`.
+
+Visual placement:
+
+- Right side of the existing header row (use `ml-auto` or `justify-between` on the header flex container).
+- Compact: email + sign-out button should not overwhelm the header.
+
+------------------------------------------------------------------------
+
