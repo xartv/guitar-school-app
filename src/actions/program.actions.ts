@@ -2,9 +2,10 @@
 
 import { prisma } from "@/lib/prisma"
 
-export async function createProgram(title: string) {
+// userId will be replaced by auth() session in Task 73
+export async function createProgram(title: string, userId?: string) {
   const program = await prisma.program.create({
-    data: { title },
+    data: { title, userId: userId ?? "" },
   })
 
   return program
