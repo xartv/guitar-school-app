@@ -1,3 +1,4 @@
+import { auth } from "@/auth"
 import { getProgram } from "@/actions/program.actions"
 import { getLevels } from "@/actions/level.actions"
 import { getRepertoireItems } from "@/actions/repertoire.actions"
@@ -5,9 +6,10 @@ import CreateProgramForm from "@/features/program/CreateProgramForm"
 import AddLevelButton from "@/features/levels/AddLevelButton"
 import LevelAccordion from "@/features/levels/LevelAccordion"
 import RepertoireSection from "@/features/repertoire/RepertoireSection"
+import { HeaderUserMenu } from "@/features/auth/HeaderUserMenu"
 
 export default async function Home() {
-  const program = await getProgram()
+  const [session, program] = await Promise.all([auth(), getProgram()])
   const [levels, repertoireItems] = program
     ? await Promise.all([getLevels(program.id), getRepertoireItems(program.id)])
     : [[], []]
@@ -22,6 +24,9 @@ export default async function Home() {
           <h1 className="text-lg font-semibold tracking-tight text-foreground">
             Guitar Practice Program
           </h1>
+          {session?.user?.email && (
+            <HeaderUserMenu email={session.user.email} />
+          )}
         </div>
       </header>
 
