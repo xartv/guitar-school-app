@@ -21,6 +21,7 @@ build/
 .claude/settings.local.json
 .claude/agent-memory/
 .playwright-mcp/
+memory/
 
 # misc
 .DS_Store
