@@ -1262,20 +1262,33 @@ After running, verify `npm run build` still succeeds. If `npm audit fix` wants t
 
 ------------------------------------------------------------------------
 
-## Task 84
+## Task 84 ✅
 
-Fix Prisma singleton — apply the global cache unconditionally in all environments.
+~~Fix Prisma singleton — apply the global cache unconditionally in all environments.~~
 
-**Problem:** In `src/lib/prisma.ts`, the line `globalForPrisma.prisma = prisma` is gated on `NODE_ENV !== "production"`, so production creates a new `PrismaClient` per module load, causing potential "database is locked" errors under concurrent requests.
+**Resolved during implementation:** The `NODE_ENV !== "production"` guard in `src/lib/prisma.ts` is intentional and correct — it matches the official Prisma recommendation for Next.js. In production, Node.js module caching already ensures `PrismaClient` is instantiated once per process lifetime. The original code requires no change.
 
-Change in `src/lib/prisma.ts`:
+If "database is locked" errors occur under concurrent writes, the correct fix is enabling SQLite WAL mode — see Task 84b below.
+
+------------------------------------------------------------------------
+
+## Task 84b
+
+Enable SQLite WAL mode to prevent "database is locked" errors under concurrent write requests.
+
+**Problem:** SQLite's default journal mode serialises all writes with an exclusive lock. Under concurrent Server Action calls, requests queue up and may time out with "database is locked".
+
+**Fix:** Enable WAL (Write-Ahead Logging) mode, which allows concurrent readers and a single writer without blocking reads.
+
+Add to `src/lib/prisma.ts` after the prisma export:
 ```ts
-// Before:
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
-
-// After:
-globalForPrisma.prisma = prisma
+// Enable WAL mode for SQLite to prevent "database is locked" under concurrent writes
+prisma.$executeRawUnsafe("PRAGMA journal_mode=WAL;").catch(() => {})
 ```
+
+Alternatively, configure it via `PrismaClient` driver options if the adapter supports it.
+
+After the change, run `npm run build` to confirm no errors.
 
 ------------------------------------------------------------------------
 
