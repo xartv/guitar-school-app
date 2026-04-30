@@ -1292,7 +1292,7 @@ After the change, run `npm run build` to confirm no errors.
 
 ------------------------------------------------------------------------
 
-## Task 82
+## Task 82 ✅
 
 Move `dev.db` out of the project root to a `data/` subdirectory.
 
