@@ -1236,3 +1236,331 @@ Visual placement:
 
 ------------------------------------------------------------------------
 
+# Phase: Security & Production Hardening
+
+## Task 75
+
+Update `next` to the latest version to patch 6 known CVEs, including a CSRF bypass in Server Actions (GHSA-mq59-m269-xvcx).
+
+```
+npm install next@latest
+```
+
+After installing, run `npm run build` to confirm the project still compiles without errors.
+
+------------------------------------------------------------------------
+
+## Task 76
+
+Run `npm audit fix` to resolve known CVEs in transitive dependencies (`prisma` dev tooling, `postcss`).
+
+```
+npm audit fix
+```
+
+After running, verify `npm run build` still succeeds. If `npm audit fix` wants to make breaking changes (`--force`), do NOT use `--force` — report which packages need manual review instead.
+
+------------------------------------------------------------------------
+
+## Task 84
+
+Fix Prisma singleton — apply the global cache unconditionally in all environments.
+
+**Problem:** In `src/lib/prisma.ts`, the line `globalForPrisma.prisma = prisma` is gated on `NODE_ENV !== "production"`, so production creates a new `PrismaClient` per module load, causing potential "database is locked" errors under concurrent requests.
+
+Change in `src/lib/prisma.ts`:
+```ts
+// Before:
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+
+// After:
+globalForPrisma.prisma = prisma
+```
+
+------------------------------------------------------------------------
+
+## Task 82
+
+Move `dev.db` out of the project root to a `data/` subdirectory.
+
+**Problem:** The SQLite database lives at the project root (`./dev.db`), risking accidental exposure via a misconfigured reverse proxy or static file server.
+
+Changes:
+- Create a `data/` directory at the project root.
+- Update `DATABASE_URL` in `.env` to `file:./data/dev.db`.
+- Update `.env.example` accordingly.
+- Add `data/` to `.gitignore`.
+- Run `mcp__prisma-local__migrate-dev` to confirm Prisma picks up the new path, or check status.
+- Delete the old `dev.db` from the project root after confirming the app runs correctly.
+
+------------------------------------------------------------------------
+
+## Task 86
+
+Add a startup check for `AUTH_SECRET` to prevent deployment with an empty secret.
+
+**Problem:** If `AUTH_SECRET` is unset or empty, NextAuth signs JWTs with an empty key — all sessions are trivially forgeable.
+
+Create `src/lib/env-check.ts`:
+```ts
+export function checkRequiredEnvVars() {
+  if (!process.env.AUTH_SECRET) {
+    throw new Error("AUTH_SECRET environment variable is required but not set")
+  }
+}
+```
+
+Call `checkRequiredEnvVars()` at the top of `src/auth.ts` (before the NextAuth initialization).
+
+Update `.env.example`:
+```
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=
+```
+
+------------------------------------------------------------------------
+
+## Task 83
+
+Set an explicit JWT session expiry in the NextAuth config.
+
+**Problem:** The JWT session uses Next-Auth's implicit 30-day default with no explicit configuration.
+
+In the NextAuth config (`src/auth.ts` or `src/auth.config.ts`), update:
+```ts
+session: {
+  strategy: "jwt",
+  maxAge: 60 * 60 * 24 * 7, // 7 days
+},
+```
+
+------------------------------------------------------------------------
+
+## Task 78
+
+Disable open registration — add an environment-variable gate to `registerUser`.
+
+**Problem:** `/register` is publicly accessible, allowing anyone on the internet to create an account in what is a personal single-user app.
+
+Changes to `src/actions/auth.actions.ts`:
+- At the top of `registerUser`, add:
+  ```ts
+  if (process.env.REGISTRATION_ENABLED !== "true") {
+    throw new Error("Registration is currently disabled")
+  }
+  ```
+
+Changes to `.env`:
+- Add `REGISTRATION_ENABLED=true` (so the current dev setup continues to work).
+
+Changes to `.env.example`:
+- Add `REGISTRATION_ENABLED=true` with a comment: set to `"true"` only when you need to create a new account; disable after initial setup.
+
+------------------------------------------------------------------------
+
+## Task 77
+
+Fix IDOR (Insecure Direct Object Reference) — add ownership checks to all resource mutation Server Actions.
+
+**Problem:** Every action in `level.actions.ts`, `skill.actions.ts`, and `repertoire.actions.ts` accepts bare resource IDs (`levelId`, `skillId`, `stageId`, `entryId`, `itemId`, etc.) without verifying that the resource belongs to the authenticated user. Any logged-in user can pass another user's IDs and mutate their data.
+
+**Fix:** In each mutation action, resolve ownership before acting. Ownership chain: `TempoEntry → Skill → Level → Program → userId`, `SkillStage → Skill → Level → Program → userId`, `YoutubeLink → Skill → Level → Program → userId`, `RepertoireLink → RepertoireItem → Program → userId`.
+
+Pattern for each action:
+```ts
+const session = await auth()
+if (!session?.user?.id) throw new Error("Not authenticated")
+// For a levelId:
+const level = await prisma.level.findUnique({
+  where: { id: levelId },
+  include: { program: { select: { userId: true } } },
+})
+if (!level || level.program.userId !== session.user.id) throw new Error("Not found")
+// proceed
+```
+
+Actions to fix in `level.actions.ts`:
+- `deleteLevel(levelId)`
+- `updateLevelTitle(levelId, title)`
+- `createLevel(programId)` — verify `program.userId === session.user.id`
+
+Actions to fix in `skill.actions.ts`:
+- `createSkill(levelId, title)` — verify level ownership
+- `deleteSkill(skillId)`
+- `updateSkillNotes(skillId, notes)`
+- `addYoutubeLink(skillId, url)`
+- `deleteYoutubeLink(linkId)` — traverse `YoutubeLink → Skill → Level → Program`
+- `toggleStage(stageId, completed)` — traverse `SkillStage → Skill → Level → Program`
+- `createTempoEntry(skillId, quarterBpm)` — verify skill ownership
+- `deleteTempoEntry(entryId)` — traverse `TempoEntry → Skill → Level → Program`
+
+Actions to fix in `repertoire.actions.ts`:
+- `createRepertoireItem(programId, title)` — verify `program.userId`
+- `deleteRepertoireItem(itemId)` — traverse `RepertoireItem → Program`
+- `toggleRepertoireItemCompleted(itemId, completed)`
+- `updateRepertoireItemNotes(itemId, notes)`
+- `addRepertoireLink(itemId, url)`
+- `deleteRepertoireLink(linkId)` — traverse `RepertoireLink → RepertoireItem → Program`
+
+After all changes, run `npm run build` to confirm no TypeScript errors.
+
+------------------------------------------------------------------------
+
+## Task 88
+
+Add ownership checks to read-only Server Actions that accept client-supplied `programId`.
+
+**Problem:** `getLevels(programId)` and `getRepertoireItems(programId)` are exported Server Actions — any logged-in user can call them with an arbitrary `programId` and read another user's data.
+
+Changes to `src/actions/level.actions.ts` (`getLevels`) and `src/actions/repertoire.actions.ts` (`getRepertoireItems`):
+
+```ts
+const session = await auth()
+if (!session?.user?.id) return []
+const program = await prisma.program.findUnique({
+  where: { id: programId, userId: session.user.id },
+})
+if (!program) return []
+// proceed with original query
+```
+
+------------------------------------------------------------------------
+
+## Task 80
+
+Validate YouTube URLs server-side before storing them.
+
+**Problem:** `addYoutubeLink` and `addRepertoireLink` accept any string as a URL. A `javascript:` URI or arbitrary string is stored in the database and rendered as an `<a href>`.
+
+Changes to `src/actions/skill.actions.ts` (`addYoutubeLink`) and `src/actions/repertoire.actions.ts` (`addRepertoireLink`):
+
+```ts
+if (!url.trim()) throw new Error("URL cannot be empty")
+let parsed: URL
+try {
+  parsed = new URL(url)
+} catch {
+  throw new Error("Invalid URL")
+}
+const allowed = ["youtube.com", "www.youtube.com", "youtu.be"]
+if (!allowed.includes(parsed.hostname)) {
+  throw new Error("Only YouTube links are allowed")
+}
+```
+
+------------------------------------------------------------------------
+
+## Task 81
+
+Add server-side input length validation to all text-accepting Server Actions.
+
+**Problem:** Most actions accept unbounded strings; a malicious client can send megabyte-sized inputs stored directly in the database.
+
+Changes:
+
+`src/actions/skill.actions.ts`:
+- `createSkill(levelId, title)`: `if (!title.trim()) throw new Error("Title cannot be empty")` and `if (title.length > 500) throw new Error("Title too long")`
+- `updateSkillNotes(skillId, notes)`: `if (notes && notes.length > 50_000) throw new Error("Notes too long")`
+
+`src/actions/repertoire.actions.ts`:
+- `createRepertoireItem(programId, title)`: same title checks as above
+- `updateRepertoireItemNotes(itemId, notes)`: same notes length check
+
+`src/actions/auth.actions.ts`:
+- `registerUser`: increase minimum password from 6 to 8 characters; add max 72 characters: `if (password.length > 72) throw new Error("Password too long")`
+
+------------------------------------------------------------------------
+
+## Task 85
+
+Add `rehype-sanitize` to all `ReactMarkdown` usages to make XSS protection explicit.
+
+**Problem:** `react-markdown` blocks `javascript:` URIs by default, but this is version-dependent and implicit.
+
+Install:
+```
+npm install rehype-sanitize
+```
+
+Changes to `src/components/SkillCard.tsx` and `src/components/RepertoireCard.tsx`:
+```tsx
+import rehypeSanitize from "rehype-sanitize"
+// ...
+<ReactMarkdown rehypePlugins={[rehypeSanitize]}>{notes}</ReactMarkdown>
+```
+
+------------------------------------------------------------------------
+
+## Task 87
+
+Add `sandbox` and `referrerpolicy` attributes to the YouTube `<iframe>` in `src/components/YoutubeEmbed/YoutubeEmbed.tsx`.
+
+```tsx
+<iframe
+  // existing props...
+  sandbox="allow-scripts allow-same-origin allow-presentation"
+  referrerPolicy="no-referrer"
+/>
+```
+
+------------------------------------------------------------------------
+
+## Task 79
+
+Add HTTP security headers to `next.config.ts`.
+
+**Problem:** The app sets no security headers, leaving it exposed to clickjacking, MIME sniffing, and referrer leakage.
+
+Add a `headers()` function to `next.config.ts`:
+
+```ts
+async headers() {
+  return [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        {
+          key: "Content-Security-Policy",
+          value: [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: https:",
+            "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
+            "font-src 'self'",
+            "connect-src 'self'",
+            "frame-ancestors 'none'",
+          ].join("; "),
+        },
+      ],
+    },
+  ]
+},
+```
+
+After adding, run `npm run build` and verify the dev server still works (YouTube embeds load, no CSP console errors).
+
+------------------------------------------------------------------------
+
+## Task 89
+
+Migrate `src/middleware.ts` to `src/proxy.ts` (Next.js 16 deprecation).
+
+**Problem:** Next.js 16 deprecated the `middleware` file convention in favour of `proxy`. The current `src/middleware.ts` exports the NextAuth `auth` guard and triggers a deprecation warning on every build.
+
+**Important constraint:** `proxy` runs on the **Node.js runtime** (not Edge). The current `middleware.ts` is designed to run on the Edge runtime — this is why `src/auth.config.ts` exists as a separate file that avoids importing Prisma or any Node.js-only modules. When migrating to `proxy`, the Edge constraint is lifted and `auth.config.ts` can potentially be merged back into `src/auth.ts`.
+
+Steps:
+1. Run the official codemod: `npx @next/codemod@latest middleware-to-proxy .`
+2. Verify `src/proxy.ts` is created and `src/middleware.ts` is removed.
+3. Decide whether to keep the split-config pattern (`auth.config.ts` + `auth.ts`) or merge them — since `proxy` runs on Node.js, Prisma can be imported directly and the split is no longer required. Merging is recommended for simplicity.
+4. Update the `config.matcher` if the codemod does not preserve it.
+5. Run `npm run build` — the deprecation warning should be gone.
+6. Test that unauthenticated requests to `/` still redirect to `/login`.
+
+------------------------------------------------------------------------
+
