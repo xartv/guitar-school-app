@@ -1238,7 +1238,7 @@ Visual placement:
 
 # Phase: Security & Production Hardening
 
-## Task 75
+## Task 75 ✅
 
 Update `next` to the latest version to patch 6 known CVEs, including a CSRF bypass in Server Actions (GHSA-mq59-m269-xvcx).
 
