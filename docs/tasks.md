@@ -1250,7 +1250,7 @@ After installing, run `npm run build` to confirm the project still compiles with
 
 ------------------------------------------------------------------------
 
-## Task 76
+## Task 76 ✅
 
 Run `npm audit fix` to resolve known CVEs in transitive dependencies (`prisma` dev tooling, `postcss`).
 
