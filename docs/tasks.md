@@ -1272,7 +1272,7 @@ If "database is locked" errors occur under concurrent writes, the correct fix is
 
 ------------------------------------------------------------------------
 
-## Task 84b
+## Task 84b ✅
 
 Enable SQLite WAL mode to prevent "database is locked" errors under concurrent write requests.
 
