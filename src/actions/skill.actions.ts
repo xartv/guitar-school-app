@@ -2,9 +2,59 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { checkLevelCompletion, createNextLevel } from "@/actions/level.actions"
+import { checkLevelCompletion, createNextLevel, checkSkillCompletion } from "@/actions/_internal"
+import { auth } from "@/auth"
+
+async function getSessionUserId(): Promise<string> {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Not authenticated")
+  return session.user.id
+}
+
+async function assertLevelOwnership(levelId: string, userId: string): Promise<void> {
+  const level = await prisma.level.findUnique({
+    where: { id: levelId },
+    select: { program: { select: { userId: true } } },
+  })
+  if (!level || level.program.userId !== userId) throw new Error("Not found")
+}
+
+async function assertSkillOwnership(skillId: string, userId: string): Promise<void> {
+  const skill = await prisma.skill.findUnique({
+    where: { id: skillId },
+    select: { level: { select: { program: { select: { userId: true } } } } },
+  })
+  if (!skill || skill.level.program.userId !== userId) throw new Error("Not found")
+}
+
+async function assertStageOwnership(stageId: string, userId: string): Promise<void> {
+  const stage = await prisma.skillStage.findUnique({
+    where: { id: stageId },
+    select: { skill: { select: { level: { select: { program: { select: { userId: true } } } } } } },
+  })
+  if (!stage || stage.skill.level.program.userId !== userId) throw new Error("Not found")
+}
+
+async function assertYoutubeLinkOwnership(linkId: string, userId: string): Promise<void> {
+  const link = await prisma.youtubeLink.findUnique({
+    where: { id: linkId },
+    select: { skill: { select: { level: { select: { program: { select: { userId: true } } } } } } },
+  })
+  if (!link || link.skill.level.program.userId !== userId) throw new Error("Not found")
+}
+
+async function assertTempoEntryOwnership(entryId: string, userId: string): Promise<void> {
+  const entry = await prisma.tempoEntry.findUnique({
+    where: { id: entryId },
+    select: { skill: { select: { level: { select: { program: { select: { userId: true } } } } } } },
+  })
+  if (!entry || entry.skill.level.program.userId !== userId) throw new Error("Not found")
+}
 
 export async function createSkill(levelId: string, title: string) {
+  const userId = await getSessionUserId()
+  await assertLevelOwnership(levelId, userId)
+
   const skill = await prisma.skill.create({
     data: {
       title,
@@ -25,6 +75,9 @@ export async function createSkill(levelId: string, title: string) {
 }
 
 export async function updateSkillNotes(skillId: string, notes: string) {
+  const userId = await getSessionUserId()
+  await assertSkillOwnership(skillId, userId)
+
   await prisma.skill.update({
     where: { id: skillId },
     data: { notes },
@@ -32,6 +85,9 @@ export async function updateSkillNotes(skillId: string, notes: string) {
 }
 
 export async function createTempoEntry(skillId: string, quarterBpm: number) {
+  const userId = await getSessionUserId()
+  await assertSkillOwnership(skillId, userId)
+
   if (!Number.isInteger(quarterBpm) || quarterBpm < 1) {
     throw new Error("Quarter-note BPM must be a positive integer")
   }
@@ -43,11 +99,17 @@ export async function createTempoEntry(skillId: string, quarterBpm: number) {
 }
 
 export async function deleteTempoEntry(entryId: string) {
+  const userId = await getSessionUserId()
+  await assertTempoEntryOwnership(entryId, userId)
+
   await prisma.tempoEntry.delete({ where: { id: entryId } })
   revalidatePath("/")
 }
 
 export async function toggleStage(stageId: string, completed: boolean) {
+  const userId = await getSessionUserId()
+  await assertStageOwnership(stageId, userId)
+
   const stage = await prisma.skillStage.update({
     where: { id: stageId },
     data: { completed },
@@ -75,34 +137,26 @@ export async function toggleStage(stageId: string, completed: boolean) {
 }
 
 export async function addYoutubeLink(skillId: string, url: string) {
+  const userId = await getSessionUserId()
+  await assertSkillOwnership(skillId, userId)
+
   await prisma.youtubeLink.create({
     data: { skillId, url },
   })
 }
 
 export async function deleteYoutubeLink(linkId: string) {
+  const userId = await getSessionUserId()
+  await assertYoutubeLinkOwnership(linkId, userId)
+
   await prisma.youtubeLink.delete({ where: { id: linkId } })
   revalidatePath("/")
 }
 
-export async function checkSkillCompletion(skillId: string): Promise<boolean> {
-  const stages = await prisma.skillStage.findMany({
-    where: { skillId },
-  })
-
-  if (stages.length === 0) return false
-
-  const completed = stages.every((stage) => stage.completed)
-
-  await prisma.skill.update({
-    where: { id: skillId },
-    data: { completed },
-  })
-
-  return completed
-}
-
 export async function deleteSkill(skillId: string) {
+  const userId = await getSessionUserId()
+  await assertSkillOwnership(skillId, userId)
+
   await prisma.$transaction([
     prisma.skillStage.deleteMany({ where: { skillId } }),
     prisma.youtubeLink.deleteMany({ where: { skillId } }),

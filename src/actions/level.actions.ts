@@ -2,6 +2,29 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/auth"
+
+async function getSessionUserId(): Promise<string> {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Not authenticated")
+  return session.user.id
+}
+
+async function assertLevelOwnership(levelId: string, userId: string): Promise<void> {
+  const level = await prisma.level.findUnique({
+    where: { id: levelId },
+    select: { program: { select: { userId: true } } },
+  })
+  if (!level || level.program.userId !== userId) throw new Error("Not found")
+}
+
+async function assertProgramOwnership(programId: string, userId: string): Promise<void> {
+  const program = await prisma.program.findUnique({
+    where: { id: programId },
+    select: { userId: true },
+  })
+  if (!program || program.userId !== userId) throw new Error("Not found")
+}
 
 export async function getLevels(programId: string) {
   const levels = await prisma.level.findMany({
@@ -23,6 +46,9 @@ export async function getLevels(programId: string) {
 }
 
 export async function deleteLevel(levelId: string) {
+  const userId = await getSessionUserId()
+  await assertLevelOwnership(levelId, userId)
+
   await prisma.$transaction(async (tx) => {
     const skills = await tx.skill.findMany({
       where: { levelId },
@@ -38,39 +64,10 @@ export async function deleteLevel(levelId: string) {
   })
 }
 
-export async function checkLevelCompletion(levelId: string): Promise<boolean> {
-  const skills = await prisma.skill.findMany({
-    where: { levelId },
-    select: { completed: true },
-  })
-
-  if (skills.length === 0) return false
-
-  return skills.every((skill) => skill.completed)
-}
-
-export async function createNextLevel(levelId: string) {
-  const level = await prisma.level.findUniqueOrThrow({
-    where: { id: levelId },
-    select: { programId: true },
-  })
-
-  const maxOrder = await prisma.level.aggregate({
-    where: { programId: level.programId },
-    _max: { order: true },
-  })
-  const order = (maxOrder._max.order ?? 0) + 1
-
-  return prisma.level.create({
-    data: {
-      title: `Level ${order}`,
-      order,
-      programId: level.programId,
-    },
-  })
-}
-
 export async function updateLevelTitle(levelId: string, title: string) {
+  const userId = await getSessionUserId()
+  await assertLevelOwnership(levelId, userId)
+
   const trimmed = title.trim()
   if (!trimmed || trimmed.length > 200) return
   await prisma.level.update({
@@ -81,6 +78,9 @@ export async function updateLevelTitle(levelId: string, title: string) {
 }
 
 export async function createLevel(programId: string) {
+  const userId = await getSessionUserId()
+  await assertProgramOwnership(programId, userId)
+
   const count = await prisma.level.count({ where: { programId } })
   const order = count + 1
 

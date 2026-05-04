@@ -1371,7 +1371,7 @@ Changes to `.env.example`:
 
 ------------------------------------------------------------------------
 
-## Task 77
+## Task 77 ✅
 
 Fix IDOR (Insecure Direct Object Reference) — add ownership checks to all resource mutation Server Actions.
 
