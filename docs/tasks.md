@@ -881,7 +881,7 @@ Update `src/app/page.tsx`:
 
 ------------------------------------------------------------------------
 
-## Task 62
+## Task 62 ✅
 
 Remove `tempo Int?` from the `Skill` model and add a new `TempoEntry` model to `prisma/schema.prisma`.
 
@@ -906,7 +906,7 @@ Technical notes: `onDelete: Cascade` on the `skill` relation ensures `TempoEntry
 
 ------------------------------------------------------------------------
 
-## Task 63
+## Task 63 ✅
 
 Replace the `updateSkillTempo` server action with `createTempoEntry` and `deleteTempoEntry` in `src/actions/skill.actions.ts`.
 
@@ -924,7 +924,7 @@ Technical notes: The 1–300 validation range applies to the quarter-note BPM ba
 
 ------------------------------------------------------------------------
 
-## Task 64
+## Task 64 ✅
 
 Build the `TempoTable` client component at `src/components/TempoTable/TempoTable.tsx` (with `TempoTable.module.css`).
 
@@ -951,7 +951,7 @@ Technical notes: All conversion math is client-side only. Use CSS Modules for ta
 
 ------------------------------------------------------------------------
 
-## Task 65
+## Task 65 ✅
 
 Wire `TempoTable` into `SkillCard` and update all data fetching call-sites.
 
