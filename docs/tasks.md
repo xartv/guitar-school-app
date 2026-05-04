@@ -1308,7 +1308,7 @@ Changes:
 
 ------------------------------------------------------------------------
 
-## Task 86
+## Task 86 ✅
 
 Add a startup check for `AUTH_SECRET` to prevent deployment with an empty secret.
 
