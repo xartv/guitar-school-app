@@ -1349,7 +1349,7 @@ session: {
 
 ------------------------------------------------------------------------
 
-## Task 78
+## Task 78 ✅
 
 Disable open registration — add an environment-variable gate to `registerUser`.
 

@@ -6,6 +6,10 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export async function registerUser(email: string, password: string): Promise<void> {
+  if (process.env.REGISTRATION_ENABLED !== "true") {
+    throw new Error("Registration is currently disabled")
+  }
+
   const normalizedEmail = email.trim().toLowerCase()
 
   if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
