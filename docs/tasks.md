@@ -1333,7 +1333,7 @@ AUTH_SECRET=
 
 ------------------------------------------------------------------------
 
-## Task 83
+## Task 83 ✅
 
 Set an explicit JWT session expiry in the NextAuth config.
 
