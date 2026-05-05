@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import ReactMarkdown from "react-markdown"
+import rehypeSanitize from "rehype-sanitize"
 import {
   deleteRepertoireItem,
   toggleRepertoireItemCompleted,
@@ -210,7 +211,7 @@ export function RepertoireCard({ item, links }: RepertoireCardProps) {
               <div className="flex flex-col gap-1">
                 {item.notes && (
                   <div className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2 prose prose-xs max-w-none">
-                    <ReactMarkdown>{item.notes}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{item.notes}</ReactMarkdown>
                   </div>
                 )}
                 <Button

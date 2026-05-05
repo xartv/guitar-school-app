@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import type { SkillStageModel } from "@/generated/prisma/models/SkillStage"
 import type { YoutubeLinkModel } from "@/generated/prisma/models/YoutubeLink"
 import ReactMarkdown from "react-markdown"
+import rehypeSanitize from "rehype-sanitize"
 import { deleteSkill, updateSkillNotes, addYoutubeLink, deleteYoutubeLink } from "@/actions/skill.actions"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -219,7 +220,7 @@ export function SkillCard({ skill, stages, links, tempoEntries, completed = fals
               <div className="flex flex-col gap-1">
                 {skill.notes && (
                   <div className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2 prose prose-xs max-w-none">
-                    <ReactMarkdown>{skill.notes}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{skill.notes}</ReactMarkdown>
                   </div>
                 )}
                 <Button

@@ -1484,7 +1484,7 @@ Changes:
 
 ------------------------------------------------------------------------
 
-## Task 85
+## Task 85 ✅
 
 Add `rehype-sanitize` to all `ReactMarkdown` usages to make XSS protection explicit.
 
