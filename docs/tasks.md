@@ -1504,7 +1504,7 @@ import rehypeSanitize from "rehype-sanitize"
 
 ------------------------------------------------------------------------
 
-## Task 87
+## Task 87 ✅
 
 Add `sandbox` and `referrerpolicy` attributes to the YouTube `<iframe>` in `src/components/YoutubeEmbed/YoutubeEmbed.tsx`.
 
@@ -1518,7 +1518,7 @@ Add `sandbox` and `referrerpolicy` attributes to the YouTube `<iframe>` in `src/
 
 ------------------------------------------------------------------------
 
-## Task 79
+## Task 79 ✅
 
 Add HTTP security headers to `next.config.ts`.
 
