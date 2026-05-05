@@ -35,6 +35,13 @@ async function assertRepertoireLinkOwnership(linkId: string, userId: string): Pr
 }
 
 export async function getRepertoireItems(programId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return []
+  const program = await prisma.program.findUnique({
+    where: { id: programId, userId: session.user.id },
+  })
+  if (!program) return []
+
   return prisma.repertoireItem.findMany({
     where: { programId },
     orderBy: { createdAt: "asc" },

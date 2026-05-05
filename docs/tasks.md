@@ -1419,7 +1419,7 @@ After all changes, run `npm run build` to confirm no TypeScript errors.
 
 ------------------------------------------------------------------------
 
-## Task 88
+## Task 88 ✅
 
 Add ownership checks to read-only Server Actions that accept client-supplied `programId`.
 

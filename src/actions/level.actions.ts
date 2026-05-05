@@ -27,6 +27,13 @@ async function assertProgramOwnership(programId: string, userId: string): Promis
 }
 
 export async function getLevels(programId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return []
+  const program = await prisma.program.findUnique({
+    where: { id: programId, userId: session.user.id },
+  })
+  if (!program) return []
+
   const levels = await prisma.level.findMany({
     where: { programId },
     orderBy: { order: "asc" },
