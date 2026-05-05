@@ -1439,7 +1439,7 @@ if (!program) return []
 
 ------------------------------------------------------------------------
 
-## Task 80
+## Task 80 ✅
 
 Validate YouTube URLs server-side before storing them.
 

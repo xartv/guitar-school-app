@@ -140,9 +140,25 @@ export async function addYoutubeLink(skillId: string, url: string) {
   const userId = await getSessionUserId()
   await assertSkillOwnership(skillId, userId)
 
+  if (!url.trim()) throw new Error("URL cannot be empty")
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    throw new Error("Invalid URL")
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    throw new Error("Only https and http URLs are allowed")
+  }
+  const allowed = ["youtube.com", "www.youtube.com", "youtu.be"]
+  if (!allowed.includes(parsed.hostname)) {
+    throw new Error("Only YouTube links are allowed")
+  }
+
   await prisma.youtubeLink.create({
-    data: { skillId, url },
+    data: { skillId, url: url.trim() },
   })
+  revalidatePath("/")
 }
 
 export async function deleteYoutubeLink(linkId: string) {
