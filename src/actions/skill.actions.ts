@@ -55,9 +55,13 @@ export async function createSkill(levelId: string, title: string) {
   const userId = await getSessionUserId()
   await assertLevelOwnership(levelId, userId)
 
+  const trimmedTitle = title.trim()
+  if (!trimmedTitle) throw new Error("Title cannot be empty")
+  if (trimmedTitle.length > 500) throw new Error("Title too long")
+
   const skill = await prisma.skill.create({
     data: {
-      title,
+      title: trimmedTitle,
       levelId,
       stages: {
         create: [
@@ -77,6 +81,8 @@ export async function createSkill(levelId: string, title: string) {
 export async function updateSkillNotes(skillId: string, notes: string) {
   const userId = await getSessionUserId()
   await assertSkillOwnership(skillId, userId)
+
+  if (notes.length > 50_000) throw new Error("Notes too long")
 
   await prisma.skill.update({
     where: { id: skillId },

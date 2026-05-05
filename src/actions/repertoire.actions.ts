@@ -55,6 +55,7 @@ export async function createRepertoireItem(programId: string, title: string) {
 
   const trimmed = title.trim()
   if (!trimmed) throw new Error("Title cannot be empty")
+  if (trimmed.length > 500) throw new Error("Title too long")
 
   await prisma.repertoireItem.create({
     data: { programId, title: trimmed },
@@ -90,6 +91,8 @@ export async function toggleRepertoireItemCompleted(itemId: string, completed: b
 export async function updateRepertoireItemNotes(itemId: string, notes: string) {
   const userId = await getSessionUserId()
   await assertRepertoireItemOwnership(itemId, userId)
+
+  if (notes.length > 50_000) throw new Error("Notes too long")
 
   await prisma.repertoireItem.update({
     where: { id: itemId },

@@ -15,8 +15,8 @@ export async function registerUser(email: string, password: string): Promise<voi
   if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
     throw new Error("Invalid email address")
   }
-  if (password.length < 6) {
-    throw new Error("Password must be at least 6 characters")
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters")
   }
   if (password.length > 72) {
     throw new Error("Password must be at most 72 characters")
