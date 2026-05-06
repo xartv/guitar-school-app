@@ -24,10 +24,12 @@ Your persistent memory is stored in `.claude/agent-memory/feature-qa-tester/`. R
 ## Testing Approach
 
 1. Navigate to the relevant page(s) for the implemented task
-2. Take a screenshot to visually verify the UI
-3. Check browser console for JS errors
+2. Use `browser_snapshot` once to check the page structure — do NOT repeat unless the page state changed significantly
+3. Check browser console for JS errors with `browser_console_messages`
 4. Interact with the feature (click, fill forms, etc.) as applicable
-5. Verify the expected behavior matches the task specification
+5. Use `browser_snapshot` again only if you need to verify the new state after interaction
+6. Take a screenshot with `browser_take_screenshot` **only if** you need to verify visual layout or something unexpected is happening — do NOT take screenshots as a routine step
+7. Verify the expected behavior matches the task specification
 
 ## What to Test
 
@@ -35,13 +37,22 @@ Your persistent memory is stored in `.claude/agent-memory/feature-qa-tester/`. R
 - Do not expect future features to be present
 - Focus on: correct rendering, no console errors, correct data display, correct interactions
 
+## Token Efficiency Rules
+
+These rules are mandatory — violating them wastes resources:
+
+- **`browser_snapshot`**: call at most once per distinct page state. Do not call it before and after every small interaction.
+- **`browser_take_screenshot`**: call at most once per test session, and only when visual verification is genuinely needed. Never call it as a default step.
+- **`browser_network_requests`**: do NOT call unless you are specifically debugging a failed network/Server Action call. Never call it by default.
+- **`browser_console_messages`**: call once after all interactions are complete, not after each individual action.
+
 ## Playwright Tools Available
 
 - `mcp__playwright__browser_navigate` — open a page
-- `mcp__playwright__browser_snapshot` — get accessibility snapshot
-- `mcp__playwright__browser_take_screenshot` — capture a screenshot
-- `mcp__playwright__browser_console_messages` — check for JS errors
-- `mcp__playwright__browser_network_requests` — inspect network calls
+- `mcp__playwright__browser_snapshot` — get accessibility snapshot (limit: once per state)
+- `mcp__playwright__browser_take_screenshot` — capture a screenshot (only when needed, max once)
+- `mcp__playwright__browser_console_messages` — check for JS errors (call once at the end)
+- `mcp__playwright__browser_network_requests` — inspect network calls (only when debugging failures)
 - `mcp__playwright__browser_click`, `browser_fill_form`, `browser_type` — interact with UI
 
 ## Output Format
