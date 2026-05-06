@@ -1589,7 +1589,7 @@ After this change, the explicit `prisma.skillStage.deleteMany`, `prisma.youtubeL
 
 ------------------------------------------------------------------------
 
-## Task 91
+## Task 91 ✅
 
 Add rate limiting to authentication endpoints to prevent brute-force attacks.
 
