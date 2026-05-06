@@ -1559,7 +1559,7 @@ After adding, run `npm run build` and verify the dev server still works (YouTube
 
 ------------------------------------------------------------------------
 
-## Task 89
+## Task 89 ✅
 
 Migrate `src/middleware.ts` to `src/proxy.ts` (Next.js 16 deprecation).
 
