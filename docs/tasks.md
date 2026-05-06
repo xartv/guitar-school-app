@@ -1559,6 +1559,142 @@ After adding, run `npm run build` and verify the dev server still works (YouTube
 
 ------------------------------------------------------------------------
 
+# Phase: Production Deployment
+
+## Task 90
+
+Fix cascade deletes in Prisma schema — add `onDelete: Cascade` to `SkillStage`, `YoutubeLink`, and `RepertoireLink` relations.
+
+**Problem:** These models are currently deleted manually in Server Actions before their parent is deleted. If any action forgets this step, orphaned rows will remain in the database with no way to clean them up.
+
+Schema changes in `prisma/schema.prisma`:
+
+```prisma
+model SkillStage {
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+
+model YoutubeLink {
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+}
+
+model RepertoireLink {
+  item RepertoireItem @relation(fields: [repertoireItemId], references: [id], onDelete: Cascade)
+}
+```
+
+Run migration with `mcp__prisma-local__migrate-dev` using migration name `add-cascade-deletes`.
+
+After this change, the explicit `prisma.skillStage.deleteMany`, `prisma.youtubeLink.deleteMany`, and `prisma.repertoireLink.deleteMany` calls in Server Actions become redundant but can be left in place as a safety net — they will simply find 0 rows to delete.
+
+------------------------------------------------------------------------
+
+## Task 91
+
+Add rate limiting to authentication endpoints to prevent brute-force attacks.
+
+**Problem:** `/login` and `/register` have no request throttling. Anyone can make unlimited password guesses per second.
+
+Install `@upstash/ratelimit` and `@upstash/redis`, or use the simpler in-memory alternative `next-rate-limit` for a single-server deployment. **Recommended approach for Vercel/distributed deployment:** use Upstash Redis (free tier available).
+
+Implementation:
+
+- Create `src/lib/ratelimit.ts` that exports a rate limiter instance: 5 requests per 15 minutes per IP for auth routes.
+- Apply the rate limiter in `src/actions/auth.actions.ts` at the top of both `loginUser` and `registerUser`:
+  - Get the caller's IP from `headers()`.
+  - Call the rate limiter; if limit exceeded, throw `new Error("Too many attempts. Please try again later.")`.
+- The `RegisterForm` and `LoginForm` components already display server action errors inline — no UI changes needed.
+
+For local development without Upstash, the rate limiter should be a no-op (check `process.env.NODE_ENV === "development"`).
+
+Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to `.env.example`.
+
+------------------------------------------------------------------------
+
+## Task 92
+
+Migrate the database from SQLite to PostgreSQL for Vercel/Neon compatibility.
+
+**Problem:** SQLite requires a persistent writable filesystem. Vercel's serverless functions run on an ephemeral read-only filesystem — SQLite cannot work there.
+
+Steps:
+
+1. Create a free Neon project at neon.tech. Copy the connection string.
+2. Update `prisma/schema.prisma` datasource:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+3. Update `prisma.config.ts` if it overrides the datasource URL — remove or update it to use `DATABASE_URL` env var directly.
+4. Update `.env` with the Neon `DATABASE_URL` (postgres connection string).
+5. Update `.env.example` to show the expected format: `DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"`.
+6. Run `mcp__prisma-local__migrate-dev` with migration name `init-postgres` to apply all existing migrations to the new Postgres database.
+7. Run `npm run build` to confirm no TypeScript errors.
+8. Verify the app runs correctly against the new database (create a test program, add a level, add a skill).
+9. Delete the old `data/dev.db` file and remove the `data/` directory from the project (update `.gitignore` accordingly — remove the `data/` entry, add `*.db` entries if not already present).
+
+Technical notes:
+- Neon provides a connection pooler URL — use the pooled URL for the app and the direct URL for migrations (Prisma recommends this pattern). See Neon + Prisma docs.
+- `sslmode=require` is mandatory for Neon connections.
+
+------------------------------------------------------------------------
+
+## Task 93
+
+Deploy the app to Vercel.
+
+**Prerequisites:** Task 91 (rate limiting) and Task 92 (PostgreSQL migration) must be completed first.
+
+Steps:
+
+1. Push the repository to GitHub (create a new private repo if needed).
+2. Go to vercel.com → "Add New Project" → import the GitHub repo.
+3. In Vercel project settings → Environment Variables, add:
+   - `DATABASE_URL` — Neon postgres connection string (pooled URL)
+   - `AUTH_SECRET` — generate with `openssl rand -base64 32`
+   - `REGISTRATION_ENABLED` — set to `"false"` for initial production deploy (create your account first in dev, then disable registration in prod)
+   - `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (from Task 91)
+4. Trigger a deploy. Vercel will run `npm run build` automatically.
+5. After deploy, open the production URL and verify:
+   - Unauthenticated visit redirects to `/login`
+   - Login works with your existing account
+   - Creating a level and skill works
+   - YouTube embed loads correctly
+
+Technical notes:
+- Vercel automatically provisions HTTPS — no nginx or certificate configuration needed.
+- Set `REGISTRATION_ENABLED=false` in production after your account is created to close the registration endpoint.
+- For the Neon database, use the **pooled connection string** in `DATABASE_URL` (Neon dashboard → Connection Details → Pooled connection).
+
+------------------------------------------------------------------------
+
+## Task 94
+
+Set up basic error monitoring with Sentry.
+
+**Problem:** In production, unhandled errors in Server Actions and client components are invisible — there is no way to know something broke without a user reporting it.
+
+Install:
+```
+npm install @sentry/nextjs
+npx @sentry/wizard@latest -i nextjs
+```
+
+The Sentry wizard will create `sentry.client.config.ts`, `sentry.server.config.ts`, and `sentry.edge.config.ts`, and update `next.config.ts` to wrap it with `withSentryConfig`.
+
+Configuration:
+- Create a free Sentry project at sentry.io (Next.js type).
+- Add `SENTRY_DSN` to `.env.example` and to Vercel environment variables.
+- Enable only error capturing — disable performance/tracing (free tier has limits):
+  ```ts
+  tracesSampleRate: 0,
+  ```
+- Verify that a test error in a Server Action appears in the Sentry dashboard.
+
+------------------------------------------------------------------------
+
 ## Task 89 ✅
 
 Migrate `src/middleware.ts` to `src/proxy.ts` (Next.js 16 deprecation).
