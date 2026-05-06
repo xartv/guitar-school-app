@@ -1561,7 +1561,7 @@ After adding, run `npm run build` and verify the dev server still works (YouTube
 
 # Phase: Production Deployment
 
-## Task 90
+## Task 90 ✅
 
 Fix cascade deletes in Prisma schema — add `onDelete: Cascade` to `SkillStage`, `YoutubeLink`, and `RepertoireLink` relations.
 
