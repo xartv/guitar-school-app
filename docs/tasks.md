@@ -1611,7 +1611,7 @@ Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to `.env.example`.
 
 ------------------------------------------------------------------------
 
-## Task 92
+## Task 92 ✅
 
 Migrate the database from SQLite to PostgreSQL for Vercel/Neon compatibility.
 
