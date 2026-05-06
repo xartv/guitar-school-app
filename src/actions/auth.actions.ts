@@ -1,11 +1,17 @@
 "use server"
 
+import { headers } from "next/headers"
 import { CredentialsSignin } from "next-auth"
 import { signIn, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { checkRateLimit } from "@/lib/ratelimit"
 
 export async function registerUser(email: string, password: string): Promise<void> {
+  const h = await headers()
+  const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim()
+  if (ip) await checkRateLimit(`register:${ip}`)
+
   if (process.env.REGISTRATION_ENABLED !== "true") {
     throw new Error("Registration is currently disabled")
   }
@@ -34,6 +40,10 @@ export async function registerUser(email: string, password: string): Promise<voi
 }
 
 export async function loginUser(email: string, password: string): Promise<void> {
+  const h = await headers()
+  const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim()
+  if (ip) await checkRateLimit(`login:${ip}`)
+
   try {
     await signIn("credentials", { email: email.trim().toLowerCase(), password, redirectTo: "/" })
   } catch (error) {
