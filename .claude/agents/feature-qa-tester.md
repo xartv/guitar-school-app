@@ -41,10 +41,13 @@ Your persistent memory is stored in `.claude/agent-memory/feature-qa-tester/`. R
 
 These rules are mandatory — violating them wastes resources:
 
-- **`browser_snapshot`**: call at most once per distinct page state. Do not call it before and after every small interaction.
+- **`browser_snapshot`**: call at most once per distinct page state. A "distinct state" means after a significant navigation or after the key action being tested — NOT after every individual click or form fill. Typical test needs 2–3 snapshots total: initial state, after key action, final state.
 - **`browser_take_screenshot`**: call at most once per test session, and only when visual verification is genuinely needed. Never call it as a default step.
 - **`browser_network_requests`**: do NOT call unless you are specifically debugging a failed network/Server Action call. Never call it by default.
 - **`browser_console_messages`**: call once after all interactions are complete, not after each individual action.
+- **No DB verification via code**: NEVER use Bash, `mcp__ide__executeCode`, or Prisma Studio to verify database state. The UI is the source of truth — if an element appears/disappears in the browser without console errors, that is a pass. Do not run SQL queries or Prisma lookups to double-check.
+- **Reuse existing data**: If a program, level, or skill already exists in the app, use it as a base for testing instead of creating everything from scratch. Only create what the test specifically requires.
+- **Minimal cleanup**: After testing, delete only the specific entities you created (e.g. one skill). Do not delete levels, programs, or user accounts unless you created them AND they are the only ones.
 
 ## Playwright Tools Available
 
