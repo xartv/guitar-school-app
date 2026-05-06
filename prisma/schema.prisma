@@ -40,7 +40,7 @@ model RepertoireLink {
   id               String         @id @default(cuid())
   url              String
   repertoireItemId String
-  item             RepertoireItem @relation(fields: [repertoireItemId], references: [id])
+  item             RepertoireItem @relation(fields: [repertoireItemId], references: [id], onDelete: Cascade)
 }
 
 model Level {
@@ -79,12 +79,12 @@ model SkillStage {
   stage     Int
   completed Boolean @default(false)
   skillId   String
-  skill     Skill   @relation(fields: [skillId], references: [id])
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
 }
 
 model YoutubeLink {
   id      String @id @default(cuid())
   url     String
   skillId String
-  skill   Skill  @relation(fields: [skillId], references: [id])
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
 }
